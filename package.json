@@ -9,8 +9,8 @@
   },
   "lint-staged": {
     "**/*.{js,jsx}": [
-      "eslint . --fix",
-      "prettier --write ."
+      "npx eslint --fix .",
+      "npx prettier --write ."
     ]
   },
   "husky": {
