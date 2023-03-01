@@ -2,14 +2,10 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
-const io = require('socket.io')(http, {
+const io = require('socket.io')(server, {
   cors: {
-    origins: ['http://localhost:5173'],
+    origins: '*',
   },
-});
-
-app.get('/', (req, res) => {
-  res.send('<h1>Hey Socket.io</h1>');
 });
 
 io.on('connection', (socket) => {
