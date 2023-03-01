@@ -13,5 +13,5 @@
     "prettier/prettier": "error"
   },
   "plugins": ["prettier"],
-  "ignorePatterns": ["**/*.html", "**/*.json"]
+  "ignorePatterns": ["**/*.json"]
 }
