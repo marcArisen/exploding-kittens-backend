@@ -13,6 +13,7 @@ io.on('connection', (socket) => {
 
   socket.on('my message', (msg) => {
     console.log(`my message: ${msg}`);
+    io.emit('my broadcast', msg);
   });
 
   socket.on('chat message', (msg) => {
