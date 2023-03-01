@@ -11,7 +11,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx}": "npm run lint",
-    "**/*": "npm run format"
+    "**/*.{js,jsx,html,json,md}": "npm run format"
   },
   "husky": {
     "hooks": {
