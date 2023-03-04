@@ -9,4 +9,6 @@ module.exports = {
   FavorCard: require('./favor-card'),
   NumberCard: require('./number-card'),
   SeeTheFutureCard: require('./see-the-future-card'),
+  NopeCard: require('./nope-card'),
+  ShuffleCard: require('./shuffle-card'),
 };
