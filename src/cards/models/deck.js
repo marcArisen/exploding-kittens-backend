@@ -72,15 +72,18 @@ class Deck {
       this.add(new card.AttackCard());
       this.add(new card.FavorCard());
       this.add(new card.SeeTheFutureCard());
+      this.add(new card.NopeCard());
+      this.add(new card.ShuffleCard());
     }
 
     // Add 5 of each number card to deck
     for (let i = 0; i < 5; i++) {
-      this.add(new card.NumberCard('1'));
-      this.add(new card.NumberCard('2'));
-      this.add(new card.NumberCard('3'));
-      this.add(new card.NumberCard('4'));
-      this.add(new card.NumberCard('5'));
+      this.add(new card.NumberCard('Tacocat'));
+      this.add(new card.NumberCard('Hairy Potato Cat'));
+      this.add(new card.NumberCard('Rainbow-Ralphing Cat'));
+      this.add(new card.NumberCard('Beard Cat'));
+      this.add(new card.NumberCard('Cattermelon'));
+      this.add(new card.NumberCard('Zombie Cat'));
     }
   }
 }
