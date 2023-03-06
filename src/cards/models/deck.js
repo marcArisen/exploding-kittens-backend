@@ -1,11 +1,11 @@
 const card = require('./card');
 
 /**
- * Represents a deck of cards in the Exploding Kittens game.
+ * Represents a deck of cards in the game.
  */
 class Deck {
   /**
-   * Create a new deck of cards.
+   * Create a new deck of cards for the game.
    */
   constructor() {
     this.cards = [];
@@ -51,40 +51,52 @@ class Deck {
   }
 
   /**
+   * Get an array of the top n cards in the deck without modifying the deck.
+   * @param {number} count - The number of cards to peek.
+   * @return {Array} - The top n cards in the deck.
+   */
+  peek(count) {
+    return this.cards.slice(0, count);
+  }
+
+  /**
+   * Add a card to the bottom of the deck.
+   * @param {Card} card - The card to add to the bottom of the deck.
+   * @param {number} amount - The amount to add to the bottom of the deck.
+   */
+  addcards(card, amount) {
+    for (let i = 0; i < amount; i++) {
+      this.cards.add(card);
+    }
+  }
+
+  /**
    * Create a new deck of cards for the game.
    */
   createDeck() {
     const explodingKitten = new card.ExplodingKittenCard(true);
 
     // Add 4 Exploding Kitten cards to deck
-    for (let i = 0; i < 4; i++) {
-      this.add(explodingKitten);
-    }
+    this.addcards(explodingKitten, 4);
 
     // Add 6 Defuse cards to deck
-    for (let i = 0; i < 6; i++) {
-      this.add(new card.DefuseCard());
-    }
+    this.addcards(new card.DefuseCard(), 6);
 
     // Add 4 of each action card to deck
-    for (let i = 0; i < 4; i++) {
-      this.add(new card.SkipCard());
-      this.add(new card.AttackCard());
-      this.add(new card.FavorCard());
-      this.add(new card.SeeTheFutureCard());
-      this.add(new card.NopeCard());
-      this.add(new card.ShuffleCard());
-    }
+    this.addcards(new card.SkipCard(), 4);
+    this.addcards(new card.AttackCard(), 4);
+    this.addcards(new card.FavorCard(), 4);
+    this.addcards(new card.SeeTheFutureCard(), 4);
+    this.addcards(new card.NopeCard(), 4);
+    this.addcards(new card.ShuffleCard(), 4);
 
     // Add 5 of each number card to deck
-    for (let i = 0; i < 5; i++) {
-      this.add(new card.NumberCard('Tacocat'));
-      this.add(new card.NumberCard('Hairy Potato Cat'));
-      this.add(new card.NumberCard('Rainbow-Ralphing Cat'));
-      this.add(new card.NumberCard('Beard Cat'));
-      this.add(new card.NumberCard('Cattermelon'));
-      this.add(new card.NumberCard('Zombie Cat'));
-    }
+    this.addcards(new card.NumberCard('Tacocat'), 5);
+    this.addcards(new card.NumberCard('Hairy Potato Cat'), 5);
+    this.addcards(new card.NumberCard('Rainbow-Ralphing Cat'), 5);
+    this.addcards(new card.NumberCard('Beard Cat'), 5);
+    this.addcards(new card.NumberCard('Cattermelon'), 5);
+    this.addcards(new card.NumberCard('Zombie Cat'), 5);
   }
 }
 
