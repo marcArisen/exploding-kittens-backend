@@ -6,19 +6,9 @@ const Card = require('./card-base');
 class ExplodingKittenCard extends Card {
   /**
    * Create a new ExplodingKittenCard.
-   * @param {boolean} exploding - Whether the card is an exploding kitten.
    */
-  constructor(exploding = false) {
+  constructor() {
     super('Exploding Kitten', 'Exploding');
-    this.exploding = exploding;
-  }
-
-  /**
-   * Check if the card is an exploding kitten.
-   * @return {boolean} - Whether the card is an exploding kitten.
-   */
-  isExploding() {
-    return this.exploding;
   }
 }
 

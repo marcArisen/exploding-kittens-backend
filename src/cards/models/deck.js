@@ -74,11 +74,6 @@ class Deck {
    * Create a new deck of cards for the game.
    */
   createDeck() {
-    const explodingKitten = new card.ExplodingKittenCard(true);
-
-    // Add 4 Exploding Kitten cards to deck
-    this.addcards(explodingKitten, 4);
-
     // Add 6 Defuse cards to deck
     this.addcards(new card.DefuseCard(), 6);
 
@@ -97,6 +92,13 @@ class Deck {
     this.addcards(new card.NumberCard('Beard Cat'), 5);
     this.addcards(new card.NumberCard('Cattermelon'), 5);
     this.addcards(new card.NumberCard('Zombie Cat'), 5);
+  }
+
+  /**
+   * Put 4 exploding kitten into the deck
+   */
+  generateBombedCat() {
+    this.addcards(new card.ExplodingKittenCard(), 4);
   }
 }
 
