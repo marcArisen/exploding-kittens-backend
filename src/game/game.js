@@ -26,7 +26,7 @@ class Game {
    */
   dealCards() {
     this.players.forEach((player) => {
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 4; i++) {
         player.addCardToHand(this.deck.draw())
       }
     });
@@ -37,6 +37,14 @@ class Game {
   addExplodingKittenCard() {
     this.deck.generateBombedCat();
     this.deck.shuffle();
+  }
+   /**
+   * Add Defuse Kitten.
+   */
+   addDefuseCard() {
+    this.players.forEach((player) => {
+        player.addCardToHand(new card.DefuseCard())
+    });
   }
 
 

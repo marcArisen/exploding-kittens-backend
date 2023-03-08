@@ -74,8 +74,8 @@ class Deck {
    * Create a new deck of cards for the game.
    */
   createDeck() {
-    // Add 6 Defuse cards to deck
-    this.addcards(new card.DefuseCard(), 6);
+    // Add 2 Defuse cards to deck
+    this.addcards(new card.DefuseCard(), 2);
 
     // Add 4 of each action card to deck
     this.addcards(new card.SkipCard(), 4);
@@ -99,6 +99,13 @@ class Deck {
    */
   generateBombedCat() {
     this.addcards(new card.ExplodingKittenCard(), 4);
+  }
+
+  /**
+   * Generate 1 defuse
+   */
+  generateDefuse() {
+    this.addcards(new card.DefuseCard(), 1);
   }
 }
 
