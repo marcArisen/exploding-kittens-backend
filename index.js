@@ -19,7 +19,8 @@ app.get('/', (req, res) => {
 
 gameRoom = new Map(); // tracking gameID - Players in that game
 
-io.use(async (socket, next) => { // middleware
+io.use(async (socket, next) => {
+  // middleware
   const token = socket.handshake.auth.token;
   socket.userName = token.name;
   socket.roomID = token.roomID;
@@ -27,7 +28,6 @@ io.use(async (socket, next) => { // middleware
 });
 
 io.on('connection', (socket) => {
-
   socket.join(socket.userName);
 
   console.log(`${socket.userName} connected`);
@@ -36,17 +36,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join room', (roomID) => {
-    if (gameRoom.has(roomID)){  // check if there is a room or not
-      if(gameRoom.get(roomID).length < 4){ // check if the room is full or not
+    if (gameRoom.has(roomID)) {
+      // check if there is a room or not
+      if (gameRoom.get(roomID).length < 4) {
+        // check if the room is full or not
         socket.join(roomID);
         gameRoom.get(roomID).push(socket.userName);
         console.log(socket.userName + ' join room: ' + roomID);
-      } 
-      else {
+      } else {
         console.log(`room #${roomID} is already full...`);
       }
-    }
-    else {  // otherwise, create new room
+    } else {
+      // otherwise, create new room
       gameRoom.set(roomID, [socket.userName]);
       console.log(`room #${roomID} is created`);
       socket.join(roomID);
@@ -54,23 +55,23 @@ io.on('connection', (socket) => {
     console.log(gameRoom);
   });
 
-  socket.on('message', ({message, roomID}, callback) => {
+  socket.on('message', ({ message, roomID }, callback) => {
     console.log('message: ' + message + ' in ' + roomID);
 
     // generate data to send to receivers
     const outgoingMessage = {
       name: socket.userName,
-      id: "socket.user.id",
+      id: 'socket.user.id',
       message,
     };
     // send socket to all in room except sender
-    socket.to(roomID).emit("message", outgoingMessage);
+    socket.to(roomID).emit('message', outgoingMessage);
     callback({
-      status: "ok"
+      status: 'ok',
     });
     // send to all including sender
     // io.to(roomName).emit('message', message);
-  })
+  });
 });
 
 server.listen(3000, () => {
