@@ -4,5 +4,6 @@
 
 ```
 npm ci
+npm run configure-husky
 node index.js
 ```
