@@ -1,4 +1,4 @@
-import Card from "./card-base";
+import Card from './card-base';
 
 /* eslint-disable prettier/prettier */
 const card = require('./card');
@@ -7,7 +7,7 @@ const card = require('./card');
  * Represents a deck of cards in the game.
  */
 class Deck {
-  cards: Array<Card>
+  cards: Array<Card>;
   /**
    * Create a new deck of cards for the game.
    */

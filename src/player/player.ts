@@ -1,5 +1,3 @@
-
-
 /**
  * Represents a player in the game.
  */
