@@ -1,6 +1,6 @@
 # exploding-kittens-backend
 
-## How to Develop the Project
+## How to Start Developing the Project
 
 ```
 npm install
