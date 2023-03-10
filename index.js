@@ -32,6 +32,7 @@ io.on('connection', (socket) => {
 
   console.log(`${socket.userName} connected`);
   socket.on('disconnect', () => {
+    gameRoom.get(socket.roomID).remove(socket.userName); // delete user from the room
     console.log(`${socket.userName} disconnected`);
   });
 
@@ -40,8 +41,9 @@ io.on('connection', (socket) => {
       // check if there is a room or not
       if (gameRoom.get(roomID).length < 4) {
         // check if the room is full or not
-        socket.join(roomID);
         gameRoom.get(roomID).push(socket.userName);
+        socket.join(roomID);
+        io.to(roomID).emit('join room', gameRoom.get(roomID));
         console.log(socket.userName + ' join room: ' + roomID);
       } else {
         console.log(`room #${roomID} is already full...`);
@@ -49,11 +51,17 @@ io.on('connection', (socket) => {
     } else {
       // otherwise, create new room
       gameRoom.set(roomID, [socket.userName]);
-      console.log(`room #${roomID} is created`);
       socket.join(roomID);
+      io.to(roomID).emit('join room', gameRoom.get(roomID));
+      console.log(`room #${roomID} is created`);
     }
     console.log(gameRoom);
   });
+
+  socket.on('exit room', (roomID) => {
+
+  })
+
 
   socket.on('message', ({ message, roomID }, callback) => {
     console.log('message: ' + message + ' in ' + roomID);
