@@ -32,7 +32,11 @@ io.on('connection', (socket) => {
 
   console.log(`${socket.userName} connected`);
   socket.on('disconnect', () => {
-    gameRoom.get(socket.roomID).remove(socket.userName); // delete user from the room
+    var filteredPlayer = gameRoom.get(socket.roomID).filter(function(value, index, arr){  // delete user from the room
+      return value != socket.userName;
+  });
+    gameRoom.set(socket.roomID, filteredPlayer);
+    io.to(socket.roomID).emit('join room', gameRoom.get(socket.roomID));
     console.log(`${socket.userName} disconnected`);
   });
 
@@ -58,9 +62,9 @@ io.on('connection', (socket) => {
     console.log(gameRoom);
   });
 
-  socket.on('exit room', (roomID) => {
+  // socket.on('exit room', (roomID) => {
 
-  })
+  // })
 
 
   socket.on('message', ({ message, roomID }, callback) => {
