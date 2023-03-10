@@ -1,6 +1,4 @@
-import Deck from './deck';
-const Card = require('./card-base');
-const Deck = require('./deck');
+import Card from './card-base';
 
 /**
  * Represents a "Nope" card in the Exploding Kittens game.
@@ -12,13 +10,6 @@ class ShuffleCard extends Card {
   constructor() {
     super('Shuffle', 'Action');
   }
-
-  /**
-   * Create a new "Nope" card.
-   */
-  ability(deck: Deck) {
-
-  }
 }
 
-module.exports = ShuffleCard;
+export default ShuffleCard;

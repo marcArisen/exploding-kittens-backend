@@ -2,6 +2,8 @@
  * Represents a card in the game.
  */
 class Card {
+  name: String;
+  type: String;
   /**
    * Create a new Card.
    * @param {string} name - The name of the card.
@@ -29,4 +31,4 @@ class Card {
   }
 }
 
-module.exports = Card;
+export default Card;

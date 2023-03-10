@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents a Favor card in the game.
@@ -12,4 +12,4 @@ class FavorCard extends Card {
   }
 }
 
-module.exports = FavorCard;
+export default FavorCard;

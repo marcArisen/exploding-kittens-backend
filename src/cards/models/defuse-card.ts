@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents a Defuse card in the game.
@@ -12,4 +12,4 @@ class DefuseCard extends Card {
   }
 }
 
-module.exports = DefuseCard;
+export default DefuseCard;

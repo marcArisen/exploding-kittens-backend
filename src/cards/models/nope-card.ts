@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents a "Nope" card in the Exploding Kittens game.
@@ -12,4 +12,4 @@ class NopeCard extends Card {
   }
 }
 
-module.exports = NopeCard;
+export default NopeCard;

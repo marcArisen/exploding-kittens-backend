@@ -1,10 +1,19 @@
-/* eslint-disable prettier/prettier */
-const Deck = require('./deck');
-const Player = require('./player');
+import Player from "../player/player";
+import Deck from "../cards/models/deck";
+import card from "../cards/models/card";
 /**
  * Represents a game of Exploding Kittens.
  */
 class Game {
+  players: Player[];
+  deck: Deck;
+  discardPile;
+  turn: number;
+  phase: Array<string>;
+  numberOfPlayers: number;
+  currentPlayerIndex: number;
+  currentPlayer: Player;
+
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
