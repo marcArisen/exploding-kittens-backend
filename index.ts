@@ -71,7 +71,6 @@ io.on('connection', (socket: any) => {
     // generate data to send to receivers
     const outgoingMessage = {
       name: socket.userName,
-      id: 'socket.user.id',
       message,
     };
     // send socket to all in room except sender
