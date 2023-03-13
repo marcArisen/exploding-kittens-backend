@@ -1,23 +1,22 @@
-import Deck from './deck';
 const Card = require('./card-base');
-const Deck = require('./deck');
 
 /**
- * Represents a "Nope" card in the Exploding Kittens game.
+ * Represents a "Shuffle" card in the Exploding Kittens game.
  */
 class ShuffleCard extends Card {
   /**
-   * Create a new "Nope" card.
+   * Create a new "Shuffle" card.
    */
   constructor() {
     super('Shuffle', 'Action');
   }
 
   /**
-   * Create a new "Nope" card.
+   * Shuffle card
+   * @param {Game} game - Game's object
    */
-  ability(deck: Deck) {
-
+  ability(game) {
+    game.deck.shuffle();
   }
 }
 
