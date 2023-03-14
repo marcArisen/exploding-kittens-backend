@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { Socket } from 'socket.io';
 
 const express = require('express');
 const app = express();
@@ -34,9 +34,12 @@ io.on('connection', (socket: any) => {
 
   console.log(`${socket.userName} connected to the server`);
   socket.on('disconnect', () => {
-    var filteredPlayer = gameRoom.get(socket.roomID).filter(function(value: any, index: any, arr: any){  // delete user from the room
-      return value != socket.userName;
-  });
+    var filteredPlayer = gameRoom
+      .get(socket.roomID)
+      .filter(function (value: any, index: any, arr: any) {
+        // delete user from the room
+        return value != socket.userName;
+      });
     gameRoom.set(socket.roomID, filteredPlayer);
     io.to(socket.roomID).emit('join room', gameRoom.get(socket.roomID));
     console.log(`${socket.userName} disconnected to the server`);
@@ -63,7 +66,6 @@ io.on('connection', (socket: any) => {
     }
     console.log(gameRoom);
   });
-
 
   socket.on('message', ({ message, roomID }: any, callback: Function) => {
     console.log('message: ' + message + ' in ' + roomID);
