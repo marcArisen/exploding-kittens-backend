@@ -1,8 +1,9 @@
 # exploding-kittens-backend
 
-## How to Run the Project
+## How to Start Developing the Project
 
 ```
-npm ci
+npm install
+npm run configure-husky
 node index.js
 ```
