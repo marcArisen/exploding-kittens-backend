@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents a Skip card in the game.
@@ -12,4 +12,4 @@ class SkipCard extends Card {
   }
 }
 
-module.exports = SkipCard;
+export default SkipCard;

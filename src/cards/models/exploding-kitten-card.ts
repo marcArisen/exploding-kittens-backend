@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents an Exploding Kitten card in the game.
@@ -12,4 +12,4 @@ class ExplodingKittenCard extends Card {
   }
 }
 
-module.exports = ExplodingKittenCard;
+export default ExplodingKittenCard;

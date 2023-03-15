@@ -1,9 +1,13 @@
+import Card from './card-base';
+
+/* eslint-disable prettier/prettier */
 const card = require('./card');
 
 /**
  * Represents a deck of cards in the game.
  */
 class Deck {
+  cards: Array<Card>;
   /**
    * Create a new deck of cards for the game.
    */
@@ -43,14 +47,6 @@ class Deck {
   }
 
   /**
-   * Add a card to the bottom of the deck.
-   * @param {Card} card - The card to add to the bottom of the deck.
-   */
-  add(card) {
-    this.cards.push(card);
-  }
-
-  /**
    * Get an array of the top n cards in the deck without modifying the deck.
    * @param {number} count - The number of cards to peek.
    * @return {Array} - The top n cards in the deck.
@@ -66,7 +62,7 @@ class Deck {
    */
   addcards(card, amount) {
     for (let i = 0; i < amount; i++) {
-      this.cards.add(card);
+      this.cards.push(card);
     }
   }
 
@@ -109,4 +105,4 @@ class Deck {
   }
 }
 
-module.exports = Deck;
+export default Deck;

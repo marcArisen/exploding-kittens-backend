@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 /**
  * Represents a "See the Future" card in the game.
  */
@@ -19,4 +19,4 @@ class SeeTheFutureCard extends Card {
   }
 }
 
-module.exports = SeeTheFutureCard;
+export default SeeTheFutureCard;

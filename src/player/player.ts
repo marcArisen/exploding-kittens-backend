@@ -2,6 +2,8 @@
  * Represents a player in the game.
  */
 class Player {
+  name: String;
+  hand;
   /**
    * Create a new player.
    * @param {string} name - The name of the player.
@@ -55,4 +57,4 @@ class Player {
   }
 }
 
-module.exports = Player;
+export default Player;

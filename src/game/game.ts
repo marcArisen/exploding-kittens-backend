@@ -1,10 +1,19 @@
-/* eslint-disable prettier/prettier */
-const Deck = require('./deck');
-const Player = require('./player');
+import Player from '../player/player';
+import Deck from '../cards/models/deck';
+import card from '../cards/models/card';
 /**
  * Represents a game of Exploding Kittens.
  */
 class Game {
+  players: Player[];
+  deck: Deck;
+  discardPile;
+  turn: number;
+  phase: Array<string>;
+  numberOfPlayers: number;
+  currentPlayerIndex: number;
+  currentPlayer: Player;
+
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
@@ -14,11 +23,10 @@ class Game {
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
-    this.phase = ["begin", "action", "draw", "end"];
+    this.phase = ['begin', 'action', 'draw', 'end'];
     this.numberOfPlayers = this.players.length;
     this.currentPlayerIndex = Math.floor(Math.random() * 4); // random number 0-3 at the beginning of the game
     this.currentPlayer = this.players[this.currentPlayerIndex]; // current player
-    
   }
 
   /**
@@ -27,7 +35,7 @@ class Game {
   dealCards() {
     this.players.forEach((player) => {
       for (let i = 0; i < 4; i++) {
-        player.addCardToHand(this.deck.draw())
+        player.addCardToHand(this.deck.draw());
       }
     });
   }
@@ -38,17 +46,13 @@ class Game {
     this.deck.generateBombedCat();
     this.deck.shuffle();
   }
-   /**
+  /**
    * Add Defuse Kitten.
    */
-   addDefuseCard() {
+  addDefuseCard() {
     this.players.forEach((player) => {
-        player.addCardToHand(new card.DefuseCard())
+      player.addCardToHand(new card.DefuseCard());
     });
   }
-
-
-
 }
-
-module.exports = Game;
+export default Game;

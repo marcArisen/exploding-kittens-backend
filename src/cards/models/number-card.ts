@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents a Number card in the game.
@@ -13,4 +13,4 @@ class NumberCard extends Card {
   }
 }
 
-module.exports = NumberCard;
+export default NumberCard;

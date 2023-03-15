@@ -1,4 +1,4 @@
-const Card = require('./card-base');
+import Card from './card-base';
 
 /**
  * Represents an Attack card in the game.
@@ -12,4 +12,4 @@ class AttackCard extends Card {
   }
 }
 
-module.exports = AttackCard;
+export default AttackCard;
