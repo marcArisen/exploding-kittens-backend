@@ -1,7 +1,6 @@
 import Card from './card-base';
 
-/* eslint-disable prettier/prettier */
-const card = require('./card');
+import card from './card';
 
 /**
  * Represents a deck of cards in the game.
@@ -95,13 +94,6 @@ class Deck {
    */
   generateBombedCat() {
     this.addcards(new card.ExplodingKittenCard(), 4);
-  }
-
-  /**
-   * Generate 1 defuse
-   */
-  generateDefuse() {
-    this.addcards(new card.DefuseCard(), 1);
   }
 }
 

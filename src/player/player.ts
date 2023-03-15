@@ -1,9 +1,10 @@
+import Card from '../cards/models/card-base';
 /**
  * Represents a player in the game.
  */
 class Player {
   name: String;
-  hand;
+  hand: Array<Card>;
   /**
    * Create a new player.
    * @param {string} name - The name of the player.
@@ -27,6 +28,10 @@ class Player {
    */
   getHand() {
     return this.hand;
+  }
+
+  getCardbyIndex(index: number) {
+    return this.hand[index];
   }
 
   /**
