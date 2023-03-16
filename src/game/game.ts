@@ -86,11 +86,12 @@ class Game {
           // Use the Defuse card
           this.currentPlayer.hand.splice(defuseIndex, 1);
           this.discardPile.push(new card.DefuseCard());
-          this.addExplodingKittenCard();
+          this.deck.addcards(new card.ExplodingKittenCard(), 1);
+          this.deck.shuffle();
           // Notify the player to place the Exploding Kitten back into the deck
         } else {
           // The player does not have a Defuse card and is eliminated
-          this.diedPlayer.push(this.currentPlayer);
+          this.AddDeadPlayer(this.currentPlayer);
           this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
@@ -159,31 +160,40 @@ class Game {
   }
 
   /**
-  * Waits for a player to play a Nope card.
-  * @returns {Promise<boolean>} True if a Nope card is played, false otherwise.
+  * Wait for a Nope card to be played, allowing players to play a Nope card in response to an action.
+  * @param {number} nopeCount - The number of consecutive Nope cards played so far.
+  * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
   */
-  async waitForNope() {
-    return new Promise((resolve) => {
-      // Wait for a certain amount of time (e.g., 5 seconds) for a response from any player
-      setTimeout(() => {
-        resolve(false); // If no response, resolve with false (no Nope card played)
-      }, 5000);
-  
-      // Listen for a response from any player
-      // Can replace the placeholder onPlayerResponse with a mechanism that fits application's architecture
-      this.players.forEach((player, index) => {
-        onPlayerResponse(index, (response) => {
-          if (/* condition indicating the player wants to play a Nope card */) {
-            const nopeCardIndex = player.hasNopeCard();
-            if (nopeCardIndex >= 0) {
-              this.playNopeCard(player, nopeCardIndex);
-              resolve(true); // Resolve with true (a Nope card was played)
-            }
-          }
-        });
-      });
-    });
-  }  
+  async waitForNope(nopeCount = 0): Promise<boolean> {
+    let nopePlayed = false;
+    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+
+    for (const player of this.players) {
+      // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
+      if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
+        const response = await Promise.race([player.chooseToPlayNope(), timeout]); //listen for play_nope event from clients
+        let nopeCardIndex = player.hasNopeCard()
+        if (response) { // If response is true, it means the player chose to play a Nope card
+          nopePlayed = true;
+          nopeCount++;
+          this.playNopeCard(player, nopeCardIndex);
+          break;
+        }
+      }
+    }
+
+    if (nopePlayed) {
+      // Wait for another Nope card in response to the current Nope card
+      const nopeCanceled = await this.waitForNope(nopeCount);
+      // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
+      return !nopeCanceled;
+    } else {
+      // If nopePlayed is false, it means there were no more Nopes played
+      // If nopeCount is odd, the original action is canceled
+      return nopeCount % 2 === 1;
+    }
+  }
+
   
 
 /**
