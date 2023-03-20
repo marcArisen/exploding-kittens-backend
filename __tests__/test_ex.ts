@@ -65,13 +65,11 @@ describe("my awesome project", () => {
     clientSocket2.emit('join room', "123"); // join the specific room
     
     clientSocket1.on("message", msg => {
-      console.log(`message to client 1: ${msg}`);
       expect(msg.name).toBe("testing_user1");
       expect(msg.message).toBe("testing message to the room ID 123");
       done();
     });
     clientSocket2.on("message", msg => {
-      console.log(`message to client 2: ${msg}`);
       expect(msg.name).toBe("testing_user1");
       expect(msg.message).toBe("testing message to the room ID 123");
       done();
@@ -79,26 +77,5 @@ describe("my awesome project", () => {
 
     clientSocket1.emit('message', { message: 'testing message to the room ID 123', roomID: "123" }, console.log);
 
-
-
-
   });
-
-  // test("should work", (done) => {
-  //   clientSocket.on("hello", (arg) => {
-  //     expect(arg).toBe("world");
-  //     done();
-  //   });
-  //   serverSocket.emit("hello", "world");
-  // });
-
-  // test("should work (with ack)", (done) => {
-  //   serverSocket.on("hi", (cb) => {
-  //     cb("hola");
-  //   });
-  //   clientSocket.emit("hi", (arg) => {
-  //     expect(arg).toBe("hola");
-  //     done();
-  //   });
-  // });
 });
