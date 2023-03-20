@@ -18,7 +18,6 @@ describe("my awesome project", () => {
 
     const httpServer = createServer();
     httpServer.listen(() => {
-      console.log(`test server starting at port ${portAddress}`);
     });
     var { port } = httpServer.address() as AddressInfo
     portAddress = port;
@@ -75,7 +74,7 @@ describe("my awesome project", () => {
       done();
   });
 
-    clientSocket1.emit('message', { message: 'testing message to the room ID 123', roomID: "123" }, console.log);
+    clientSocket1.emit('message', { message: 'testing message to the room ID 123', roomID: "123" }, (() => {}));
 
   });
 });
