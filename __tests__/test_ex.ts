@@ -84,11 +84,5 @@ describe("my awesome project", () => {
       done();
     }, 2000);
 
-    // done();
-    // clientSocket1.close();
-    // clientSocket2.close();
-    
-    // done();
-
   });
 });
