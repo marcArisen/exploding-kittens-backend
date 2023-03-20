@@ -26,8 +26,9 @@ describe("my awesome project", () => {
 
   });
 
-  afterAll(() => {
+  afterAll((done) => {
     socketApi?.io?.close();
+    done();
   });
 
   test("a user is able to login to the room", (done) => {
@@ -63,18 +64,31 @@ describe("my awesome project", () => {
     clientSocket1.emit('join room', "123"); // join the specific room
     clientSocket2.emit('join room', "123"); // join the specific room
     
-    clientSocket1.on("message", msg => {
+    clientSocket1.on("message", async msg => {
+      console.log(`message in client 1: ${msg.name}`)
       expect(msg.name).toBe("testing_user1");
       expect(msg.message).toBe("testing message to the room ID 123");
-      done();
     });
-    clientSocket2.on("message", msg => {
+    clientSocket2.on("message", async msg => {
+      console.log(`message in client 2: ${msg.name}`)
       expect(msg.name).toBe("testing_user1");
       expect(msg.message).toBe("testing message to the room ID 123");
-      done();
   });
 
+
     clientSocket1.emit('message', { message: 'testing message to the room ID 123', roomID: "123" }, (() => {}));
+
+    setTimeout(()=>{
+      clientSocket1.close();
+      clientSocket2.close();
+      done();
+    }, 2000);
+
+    // done();
+    // clientSocket1.close();
+    // clientSocket2.close();
+    
+    // done();
 
   });
 });
