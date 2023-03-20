@@ -23,18 +23,40 @@ class Game {
    * @param {string[]} playerNames - The names of the players.
    */
   constructor(playerNames) {
-    this.players = playerNames.map((name) => new Player(name));
+    this.players = playerNames.map((name) => new Player(name)); //from Socket Part
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
-    this.phase = ['begin', 'action', 'draw', 'end']; //must repair after socket.io
-    this.currentPhase = this.phase[0]; // Begin phase for the beginning
+    //this.phase = ['begin', 'action', 'draw', 'end']; //must repair after socket.io
+    //this.currentPhase = this.phase[0]; // Begin phase for the beginning
     this.numberOfPlayers = this.players.length;
     this.currentPlayerIndex = Math.floor(Math.random() * 4); // random number 0-3 at the beginning of the game
     this.currentPlayer = this.players[this.currentPlayerIndex]; // current player
     this.diedPlayer = [];
     this.attackStack = 0;
-    this.nopeChain = false;
+    //this.nopeChain = false;
+  }
+
+  sanitize(){
+    return{
+      players: this.players,
+      deck: this.deck,
+      discardPile: this.discardPile,
+      turn: this.turn,
+      numberOfPlayers: this.numberOfPlayers,
+      currentPlayerIndex: this.currentPlayerIndex,
+      currentPlayer: this.currentPhase,
+      diedPlayer: this.diedPlayer,
+      attackStack: this.attackStack
+    }
+  }
+
+
+  /**
+  * Add to Died Player
+  */
+  AddDeadPlayer(player: Player) {
+    this.diedPlayer.push(player)
   }
 
   /**
