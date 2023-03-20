@@ -7,3 +7,4 @@ npm install
 npm run configure-husky
 node index.js
 ```
+.
