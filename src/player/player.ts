@@ -10,7 +10,7 @@ class Player {
    * Create a new player.
    * @param {string} name - The name of the player.
    */
-  constructor(name) {
+  constructor(name: string) {
     this.name = name;
     this.hand = [];
   }
@@ -47,7 +47,7 @@ class Player {
    * Add a card to the player's hand.
    * @param {Card} card - The card to add to the player's hand.
    */
-  addCardToHand(card) {
+  addCardToHand(card: any) {
     this.hand.push(card);
   }
 
@@ -55,7 +55,7 @@ class Player {
    * Remove a card from the player's hand.
    * @param {Card} card - The card to remove from the player's hand.
    */
-  removeCardFromHand(card) {
+  removeCardFromHand(card: any) {
     const index = this.hand.indexOf(card);
     if (index > -1) {
       this.hand.splice(index, 1);

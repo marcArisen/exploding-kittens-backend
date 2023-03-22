@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import Game  from './src/game/game';
 
 // initialize socketio and disable cors
 const io = new Server({
@@ -16,6 +17,7 @@ const socketApi: SocketApi = {
 };
 
 const gameRoom = new Map(); // tracking gameID - Players in that game
+const gameInstances = new Map(); // tracking gameID - Game Instances
 
 io.use(async (socket: any, next: Function) => {
   // middleware
@@ -75,6 +77,23 @@ io.on('connection', (socket: any) => {
       status: 'ok',
     });
   });
+
+  /// TODO: on testing 
+  socket.on('game start', (roomID: string) => {
+    if (gameRoom.has(roomID)) {
+      // check if there is a room or not
+      if (gameRoom.get(roomID).length == 4) {
+        // check if the room is full or not
+        var listOfPlayers = gameRoom.get(roomID);
+        gameInstances.set(roomID, new Game(listOfPlayers));
+        gameInstances.get(roomID).dealCards();
+        gameInstances.get(roomID).addExplodingKittenCard();
+      } else {
+        console.log(`room #${roomID} needs more player to join...`);
+      }
+    }
+  });
+  
 });
 
 export default socketApi;

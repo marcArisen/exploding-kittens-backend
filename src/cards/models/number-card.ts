@@ -8,7 +8,7 @@ class NumberCard extends Card {
    * Create a new NumberCard.
    * @param {string} rank - The rank of the card.
    */
-  constructor(rank) {
+  constructor(rank: string) {
     super(rank, 'Number');
   }
 }

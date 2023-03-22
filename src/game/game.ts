@@ -1,29 +1,30 @@
 import Player from '../player/player';
 import Deck from '../cards/models/deck';
 import card from '../cards/models/card';
+import Card from '../cards/models/card-base';
 /**
  * Represents a game of Exploding Kittens.
  */
 class Game {
   players: Player[];
   deck: Deck;
-  discardPile;
+  discardPile: Card[];
   turn: number;
-  phase: Array<string>;
-  currentPhase: string;
+  // phase: Array<string>;
+  // currentPhase: string;
   numberOfPlayers: number;
   currentPlayerIndex: number;
   currentPlayer: Player;
   diedPlayer: Player[];
   attackStack: number;
-  lastPlayedCard;
+  lastPlayedCard: any;
 
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
    */
-  constructor(playerNames) {
-    this.players = playerNames.map((name) => new Player(name));
+  constructor(playerNames: any) {
+    this.players = playerNames.map((name: string) => new Player(name));
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
@@ -35,30 +36,30 @@ class Game {
     this.lastPlayedCard = null;
   }
 
-  sanitize(){
-    return{
+  sanitize() {
+    return {
       players: this.players,
       deck: this.deck,
       discardPile: this.discardPile,
       turn: this.turn,
       numberOfPlayers: this.numberOfPlayers,
       currentPlayerIndex: this.currentPlayerIndex,
-      currentPlayer: this.currentPhase,
+      currentPlayer: this.players[this.currentPlayerIndex],
       diedPlayer: this.diedPlayer,
       attackStack: this.attackStack,
-      lastPlayedCard: this.lastPlayedCard
-    }
+      lastPlayedCard: this.lastPlayedCard,
+    };
   }
 
   getPlayers() {
-    return this.players
+    return this.players;
   }
 
   /**
-  * Add to Died Player
-  */
+   * Add to Died Player
+   */
   AddDeadPlayer(player: Player) {
-    this.diedPlayer.push(player)
+    this.diedPlayer.push(player);
   }
 
   /**
@@ -72,10 +73,9 @@ class Game {
     });
   }
 
-    
   /**
-  * Draw cards for the current player.
-  */
+   * Draw cards for the current player.
+   */
   drawCards() {
     const drawCount = this.attackStack > 0 ? this.attackStack + 1 : 1;
     for (let i = 0; i < drawCount; i++) {
@@ -101,7 +101,6 @@ class Game {
     }
     this.attackStack = 0;
   }
-
 
   /**
    * Add exploding Kitten to the deck.
@@ -160,27 +159,28 @@ class Game {
   }
 
   /**
-  * Wait for a Nope card to be played, allowing players to play a Nope card in response to an action.
-  * @param {number} nopeCount - The number of consecutive Nope cards played so far.
-  * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
-  */
+   * Wait for a Nope card to be played, allowing players to play a Nope card in response to an action.
+   * @param {number} nopeCount - The number of consecutive Nope cards played so far.
+   * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
+   */
   async waitForNope(nopeCount = 0): Promise<boolean> {
     let nopePlayed = false;
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
-    for (const player of this.players) {
-      // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
-      if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
-        const response = await Promise.race([player.chooseToPlayNope(), timeout]); //listen for play_nope event from clients
-        let nopeCardIndex = player.hasNopeCard()
-        if (response) { // If response is true, it means the player chose to play a Nope card
-          nopePlayed = true;
-          nopeCount++;
-          this.playNopeCard(player, nopeCardIndex);
-          break;
-        }
-      }
-    }
+    // for (const player of this.players) {
+    //   // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
+    //   if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
+    //     const response = await Promise.race([player.chooseToPlayNope(), timeout]); //listen for play_nope event from clients
+    //     let nopeCardIndex = player.hasNopeCard();
+    //     if (response) {
+    //       // If response is true, it means the player chose to play a Nope card
+    //       nopePlayed = true;
+    //       nopeCount++;
+    //       this.playNopeCard(player, nopeCardIndex);
+    //       break;
+    //     }
+    //   }
+    // }
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
@@ -194,18 +194,15 @@ class Game {
     }
   }
 
-  
-
-/**
- * Play a Nope card.
- */
-playNopeCard(player: Player, cardIndex: number) {
-  const nopeCard = player.getCardbyIndex(cardIndex);
-  this.discardPile.push(nopeCard);
-  player.hand.splice(cardIndex, 1);
-  this.lastPlayedCard = nopeCard;
-}
-
+  /**
+   * Play a Nope card.
+   */
+  playNopeCard(player: Player, cardIndex: number) {
+    const nopeCard = player.getCardbyIndex(cardIndex);
+    this.discardPile.push(nopeCard);
+    player.hand.splice(cardIndex, 1);
+    this.lastPlayedCard = nopeCard;
+  }
 
   /**
    * Choose a player for favor or other targetable effects.
@@ -218,36 +215,36 @@ playNopeCard(player: Player, cardIndex: number) {
    * Use Shuffle card effect.
    */
   useShuffle() {
-      this.deck.shuffle();
+    this.deck.shuffle();
   }
 
   /**
    * Use See the future card effect.
    */
   useSeeTheFutureCard() {
-      this.deck.peek(3);
+    this.deck.peek(3);
   }
 
   /**
    * Use Skip card effect.
    */
   useSkipCard() {
-      this.nextTurn()
+    this.nextTurn();
   }
 
   /**
    * Use Attack card effect.
    */
   useAttackCard() {
-      this.attackStack++;
+    this.attackStack++;
   }
 
   /**
    * Use Favor card effect.
    */
   useFavorCard(targetPlayer: Player) {
-      const chosenCard = targetPlayer.giveRandomCard(); // Add a method to Player class to give a random card
-      this.currentPlayer.addCardToHand(chosenCard);
+    const chosenCard = targetPlayer.giveRandomCard(); // Add a method to Player class to give a random card
+    this.currentPlayer.addCardToHand(chosenCard);
   }
 
   /**

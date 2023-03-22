@@ -50,7 +50,7 @@ class Deck {
    * @param {number} count - The number of cards to peek.
    * @return {Array} - The top n cards in the deck.
    */
-  peek(count) {
+  peek(count: number) {
     return this.cards.slice(0, count);
   }
 
@@ -59,7 +59,7 @@ class Deck {
    * @param {Card} card - The card to add to the bottom of the deck.
    * @param {number} amount - The amount to add to the bottom of the deck.
    */
-  addcards(card, amount) {
+  addcards(card: any, amount: number) {
     for (let i = 0; i < amount; i++) {
       this.cards.push(card);
     }

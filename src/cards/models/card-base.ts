@@ -9,7 +9,7 @@ class Card {
    * @param {string} name - The name of the card.
    * @param {string} type - The type of the card (e.g. Action, Number).
    */
-  constructor(name, type) {
+  constructor(name: string, type: string) {
     this.name = name;
     this.type = type;
   }
