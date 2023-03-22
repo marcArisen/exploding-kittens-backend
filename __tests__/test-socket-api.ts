@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { io } from "socket.io-client";
-import socketApi from "../socketApi";
+import socketApi from "../socket-api";
 import { AddressInfo } from "net";
 
 describe("my awesome project", () => {
