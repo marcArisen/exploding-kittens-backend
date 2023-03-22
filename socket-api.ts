@@ -1,20 +1,19 @@
-import { Server } from "socket.io";
-
+import { Server } from 'socket.io';
 
 // initialize socketio and disable cors
-const io = new Server({ 
-    cors: {
-      origin: "*",
-    }
-  });
+const io = new Server({
+  cors: {
+    origin: '*',
+  },
+});
 
 interface SocketApi {
-    io: any;
-  }
+  io: any;
+}
 
-  const socketApi: SocketApi = {
-    io: io,
-  };
+const socketApi: SocketApi = {
+  io: io,
+};
 
 const gameRoom = new Map(); // tracking gameID - Players in that game
 
@@ -27,13 +26,13 @@ io.use(async (socket: any, next: Function) => {
 });
 
 io.on('connection', (socket: any) => {
-
   socket.join(socket.userName);
 
   console.log(`${socket.userName} connected to the server`);
   socket.on('disconnect', () => {
     var filteredPlayer: Array<string> = gameRoom
-      .get(socket.roomID)?.filter(function (value: any, index: any, arr: any) {
+      .get(socket.roomID)
+      ?.filter(function (value: any, index: any, arr: any) {
         // delete user from the room
         return value != socket.userName;
       });
@@ -41,7 +40,6 @@ io.on('connection', (socket: any) => {
     io.to(socket.roomID).emit('join room', gameRoom.get(socket.roomID));
     console.log(`${socket.userName} disconnected to the server`);
   });
-
 
   socket.on('join room', (roomID: string) => {
     if (gameRoom.has(roomID)) {
