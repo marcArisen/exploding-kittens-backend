@@ -16,9 +16,9 @@ class GameServer {
 
     gameLoop() {
 
-        // while (this.game.diedPlayer.length < 3) {
-
-        // }
+        while (this.game.diedPlayer.length < 3) {
+            // TODO: need to be implemented
+        }
     }
 
 
