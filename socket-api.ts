@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import GameServer from './game-server';
 import Game  from './src/game/game';
 
 // initialize socketio and disable cors
@@ -85,9 +86,11 @@ io.on('connection', (socket: any) => {
       if (gameRoom.get(roomID).length == 4) {
         // check if the room is full or not
         var listOfPlayers = gameRoom.get(roomID);
-        gameInstances.set(roomID, new Game(listOfPlayers));
-        gameInstances.get(roomID).dealCards();
-        gameInstances.get(roomID).addExplodingKittenCard();
+        gameInstances.set(roomID, new GameServer(listOfPlayers));
+        console.log(gameInstances.get(roomID).game);
+        gameInstances.get(roomID).game.drawCards();
+        console.log("================================");
+        console.log(gameInstances.get(roomID).game);
       } else {
         console.log(`room #${roomID} needs more player to join...`);
       }

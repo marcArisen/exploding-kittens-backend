@@ -103,7 +103,7 @@ class Game {
   }
 
   /**
-   * Add exploding Kitten to the deck.
+   * Add exploding Kitten to the deck, then shuffle the deck.
    */
   addExplodingKittenCard() {
     this.deck.generateBombedCat();
