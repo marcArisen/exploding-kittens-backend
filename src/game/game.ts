@@ -167,20 +167,20 @@ class Game {
     let nopePlayed = false;
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // for (const player of this.players) {
-    //   // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
-    //   if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
-    //     const response = await Promise.race([player.chooseToPlayNope(), timeout]); //listen for play_nope event from clients
-    //     let nopeCardIndex = player.hasNopeCard();
-    //     if (response) {
-    //       // If response is true, it means the player chose to play a Nope card
-    //       nopePlayed = true;
-    //       nopeCount++;
-    //       this.playNopeCard(player, nopeCardIndex);
-    //       break;
-    //     }
-    //   }
-    // }
+    for (const player of this.players) {
+      // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
+      // if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
+      //   const response = await Promise.race([player.chooseToPlayNope(), timeout]); //listen for play_nope event from clients
+      //   let nopeCardIndex = player.hasNopeCard();
+      //   if (response) {
+      //     // If response is true, it means the player chose to play a Nope card
+      //     nopePlayed = true;
+      //     nopeCount++;
+      //     this.playNopeCard(player, nopeCardIndex);
+      //     break;
+      //   }
+      // }
+    }
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card

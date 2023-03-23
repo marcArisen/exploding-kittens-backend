@@ -1,10 +1,10 @@
 import { createServer } from 'http';
 import { io } from 'socket.io-client';
-import socketApi from '../socket-api';
+import SocketServer from '../socket-server';
 import { AddressInfo } from 'net';
 
 describe('my awesome project', () => {
-  let portAddress;
+  let portAddress, ioServer;
 
   const testingUsers: { name: string; roomID: string }[] = [
     { name: 'testing_user1', roomID: '123' },
@@ -19,12 +19,13 @@ describe('my awesome project', () => {
     httpServer.listen(() => {});
     var { port } = httpServer.address() as AddressInfo;
     portAddress = port;
-    socketApi.io.attach(httpServer);
+    ioServer = new SocketServer();
+    ioServer.io.attach(httpServer);
     done();
   });
 
   afterAll((done) => {
-    socketApi?.io?.close();
+    ioServer.io?.close();
     done();
   });
 
@@ -81,4 +82,51 @@ describe('my awesome project', () => {
       done();
     }, 2000);
   });
+
+  test('two users can join the same room and communicate with each other', (done) => {
+    var token = testingUsers[0];
+
+    let clientSocket1 = io(`http://localhost:${portAddress}`, {
+      auth: {
+        token,
+      },
+    });
+    token = testingUsers[1];
+    let clientSocket2 = io(`http://localhost:${portAddress}`, {
+      auth: {
+        token,
+      },
+    });
+    token = testingUsers[2];
+    let clientSocket3 = io(`http://localhost:${portAddress}`, {
+      auth: {
+        token,
+      },
+    });
+    token = testingUsers[3];
+    let clientSocket4 = io(`http://localhost:${portAddress}`, {
+      auth: {
+        token,
+      },
+    });
+
+    clientSocket1.emit('join room', '123'); // join the specific room
+    clientSocket2.emit('join room', '123'); // join the specific room
+    clientSocket3.emit('join room', '123'); // join the specific room
+    clientSocket4.emit('join room', '123'); // join the specific room
+
+    clientSocket4.emit(
+      'game start',
+      '123'
+    );
+
+    setTimeout(() => {
+      clientSocket1.close();
+      clientSocket2.close();
+      clientSocket3.close();
+      clientSocket4.close();
+      // done();
+    }, 2000);
+  });
+
 });

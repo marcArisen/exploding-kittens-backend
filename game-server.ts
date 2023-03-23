@@ -14,6 +14,16 @@ class GameServer {
         this.game.givePlayerDefuseCard();
     }
 
+    gameLoop() {
+
+        // while (this.game.diedPlayer.length < 3) {
+
+        // }
+    }
+
+
+
+
 }
 
 export default GameServer;
