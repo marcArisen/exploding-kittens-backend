@@ -93,6 +93,41 @@ class Player {
   hasDefuseCard() {
     return this.hand.findIndex((cards) => cards instanceof card.DefuseCard);
   }
+
+hasPair(): number[] | null {
+  const cardCounts: { [key: string]: number } = {};
+
+  // Count the occurrences of each card rank in the player's hand
+  this.hand.forEach((cards) => {
+    if (cards instanceof card.NumberCard) {
+      const rank = cards.rank;
+      if (cardCounts.hasOwnProperty(rank)) {
+        cardCounts[rank]++;
+      } else {
+        cardCounts[rank] = 1;
+      }
+    }
+  });
+
+  // Check if there's any pair in the cardCounts
+  for (const rank in cardCounts) {
+    if (cardCounts[rank] >= 2) {
+      // Find the indices of the pair in the player's hand
+      const indices: number[] = [];
+      for (let i = 0; i < this.hand.length && indices.length < 2; i++) {
+        const cards = this.hand[i];
+        if (cards instanceof card.NumberCard && cards.rank === rank) {
+          indices.push(i);
+        }
+      }
+      return indices;
+    }
+  }
+
+  return null;
 }
+
+}
+
 
 export default Player;

@@ -36,21 +36,6 @@ class Game {
     this.lastPlayedCard = null;
   }
 
-  sanitize() {
-    return {
-      players: this.players,
-      deck: this.deck,
-      discardPile: this.discardPile,
-      turn: this.turn,
-      numberOfPlayers: this.numberOfPlayers,
-      currentPlayerIndex: this.currentPlayerIndex,
-      currentPlayer: this.players[this.currentPlayerIndex],
-      diedPlayer: this.diedPlayer,
-      attackStack: this.attackStack,
-      lastPlayedCard: this.lastPlayedCard,
-    };
-  }
-
   getPlayers() {
     return this.players;
   }
@@ -121,14 +106,15 @@ class Game {
   /**
    * Play cards
    */
-  async playCard(player: Player, cardIndex: number, requestPlayNope: (player: Player) => Promise<boolean> ) {
+  async playCard(player: Player, cardIndex: number, requestPlayNopeCallback: (player: Player) => Promise<boolean>) {
     const playcard = player.getCardbyIndex(cardIndex);
     this.discardPile.push(playcard);
     player.hand.splice(cardIndex, 1);
     this.lastPlayedCard = playcard;
 
     // Check if the next player wants to play a Nope card
-    const nopeCardPlayed = await this.waitForNope(requestPlayNope);
+    const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
+
 
     if (nopeCardPlayed) {
       return;
@@ -180,10 +166,11 @@ class Game {
         }
       }
     }
+      
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
-      const nopeCanceled = await this.waitForNope(requestPlayNope, nopeCount);
+      const nopeCanceled = await this.waitForNope(requestPlayNope,nopeCount);
       // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
       return !nopeCanceled;
     } else {
@@ -246,6 +233,47 @@ class Game {
     this.currentPlayer.addCardToHand(chosenCard);
   }
 
+  async useNumberCard(player: Player, cardIndices: number[]) {
+    // Check if the player has a pair of NumberCards with the same rank
+    if (cardIndices.length === 2) {
+      const card1 = player.getCardbyIndex(cardIndices[0]);
+      const card2 = player.getCardbyIndex(cardIndices[1]);
+  
+      if (
+        card1 instanceof card.NumberCard &&
+        card2 instanceof card.NumberCard &&
+        card1.rank === card2.rank
+      ) {
+        // Discard the pair of cards
+        this.discardPile.push(card1, card2);
+        player.hand.splice(cardIndices[1], 1);
+        player.hand.splice(cardIndices[0], 1);
+  
+        // Choose a target player
+        const targetPlayer = this.choosePlayer(player);
+  
+        // Use the pair effect (steal a random card from the target player)
+        const stolenCard = targetPlayer.giveRandomCard();
+        player.addCardToHand(stolenCard);
+      }
+    }
+  }
+  
+
+  async requestCardFromPlayer(requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>, player: Player, targetPlayer: Player) {
+    const cardIndex = await requestCardFromPlayerCallback(targetPlayer);
+  
+    if (cardIndex >= 0) {
+      // Take the chosen card from the target player's hand
+      const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
+      player.addCardToHand(stolenCard);
+    } else {
+      // If the target player doesn't have any cards, nothing happens
+    }
+  }
+  
+
+
   /**
    * Move on to the next turn.
    */
@@ -256,11 +284,6 @@ class Game {
     this.turn++;
   }
 
-  /**
-   * Check if the game is over.
-   */
-  // gameLoop() {
-  //   while (this.diedPlayer.length < 3) {}
-  // }
 }
+
 export default Game;
