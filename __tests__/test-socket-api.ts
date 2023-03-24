@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import SocketServer from '../socket-server';
 import { AddressInfo } from 'net';
 
-describe('my awesome project', () => {
+describe('My Exploding Kitten Project', () => {
   let portAddress, ioServer;
 
   const testingUsers: { name: string; roomID: string }[] = [
@@ -83,7 +83,8 @@ describe('my awesome project', () => {
     }, 2000);
   });
 
-  test('two users can join the same room and communicate with each other', (done) => {
+  // TODO: on doing
+  test('Game Loop Test', (done) => {
     var token = testingUsers[0];
 
     let clientSocket1 = io(`http://localhost:${portAddress}`, {
@@ -126,7 +127,7 @@ describe('my awesome project', () => {
       clientSocket3.close();
       clientSocket4.close();
       // done();
-    }, 2000);
+    }, 1000000000);
   });
 
 });

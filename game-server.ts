@@ -3,12 +3,22 @@ import Player from './src/player/player';
 class GameServer {
 
     game: Game;
-    actionCallBack: Promise<number | null>;
-    playNopeCallBack: Promise<boolean>;
+    actionCallBack: () => Promise<any>;
+    playNopeCallBack: () => Promise<any>;
+    // actionCallBack: Promise<number | null>;
+    // playNopeCallBack: Promise<boolean>;
 
     constructor(playerNames: string[]) {
         this.game = new Game(playerNames);
+        this.actionCallBack = this.testFunc;
+        this.playNopeCallBack = this.testFunc;
         this.initialize();
+    }
+
+
+    // Function for Testing (need to remove after production)
+    async testFunc(){
+        return new Promise((resolve) => setTimeout(resolve, 6000));
     }
 
     initialize() {
@@ -46,9 +56,9 @@ class GameServer {
         // If the player plays a card within the time limit, return the card index
         // If not, return null
 
-        const timeout: Promise<undefined> = new Promise((resolve) => setTimeout(resolve, 5000));
+        const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
-        const response: number | null | undefined = await Promise.race([this.actionCallBack, timeout]);
+        const response: number | null | undefined = await Promise.race([this.actionCallBack(), timeout]);
         if (response) {
             return response;
         }
@@ -59,9 +69,9 @@ class GameServer {
         // Implement logic to request a player to play a Nope card
         // Return true if the player chooses to play a Nope card, false otherwise
 
-        const timeout: Promise<undefined> = new Promise((resolve) => setTimeout(resolve, 5000));
+        const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
-        const response: boolean | null | undefined = await Promise.race([this.playNopeCallBack, timeout]);
+        const response: boolean | null | undefined = await Promise.race([this.playNopeCallBack(), timeout]);
         if (response) {
             return response;
         }

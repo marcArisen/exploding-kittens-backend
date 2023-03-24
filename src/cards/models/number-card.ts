@@ -11,6 +11,7 @@ class NumberCard extends Card {
    */
   constructor(rank: string) {
     super(rank, 'Number');
+    this.rank = rank;
   }
 }
 

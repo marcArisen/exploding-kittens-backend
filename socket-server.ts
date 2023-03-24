@@ -100,13 +100,9 @@ class SocketServer {
                         var listOfPlayers = this.gameRoom.get(roomID)!;
                         this.gameInstances.set(roomID, new GameServer(listOfPlayers));
                         console.log(this.gameInstances.get(roomID)?.game);
+                        console.log(this.gameInstances.get(roomID)?.startGameLoop());
 
                         // TODO: emit something to notify client that game started
-
-                        // console.log(this.gameInstances.get(roomID).game);
-                        // this.gameInstances.get(roomID).game.drawCards();
-                        // console.log("================================");
-                        // console.log(this.gameInstances.get(roomID).game);
                     } else {
                         console.log(`room #${roomID} needs more player to join...`);
                     }
