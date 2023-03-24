@@ -66,9 +66,11 @@ class Game {
     for (let i = 0; i < drawCount; i++) {
       const drawnCard = this.deck.draw();
       if (drawnCard instanceof card.ExplodingKittenCard) {
+        console.log(`${this.currentPlayer.name} gets an Exploding Kitten Card`);
         const defuseIndex = this.currentPlayer.hasDefuseCard();
         if (defuseIndex >= 0) {
           // Use the Defuse card
+          console.log(`${this.currentPlayer.name} has a defuse card`)
           this.currentPlayer.hand.splice(defuseIndex, 1);
           this.discardPile.push(new card.DefuseCard());
           this.deck.addcards(new card.ExplodingKittenCard(), 1);
@@ -77,6 +79,7 @@ class Game {
         } else {
           // The player does not have a Defuse card and is eliminated
           this.AddDeadPlayer(this.currentPlayer);
+          console.log(`${this.currentPlayer.name} is dead`)
           this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
@@ -215,7 +218,11 @@ class Game {
    * Use Skip card effect.
    */
   useSkipCard() {
-    this.nextTurn();
+    if(this.attackStack == 0){
+      this.nextTurn();
+    }else{
+      this.attackStack --;
+    }
   }
 
   /**
@@ -223,6 +230,7 @@ class Game {
    */
   useAttackCard() {
     this.attackStack++;
+    this.nextTurn();
   }
 
   /**
