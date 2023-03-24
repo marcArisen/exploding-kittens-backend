@@ -94,7 +94,7 @@ class Player {
     return this.hand.findIndex((cards) => cards instanceof card.DefuseCard);
   }
 
-hasPair(): number[] | null {
+hasPair(): number[] {
   const cardCounts: { [key: string]: number } = {};
 
   // Count the occurrences of each card rank in the player's hand
@@ -123,8 +123,7 @@ hasPair(): number[] | null {
       return indices;
     }
   }
-
-  return null;
+  return [];
 }
 
 }

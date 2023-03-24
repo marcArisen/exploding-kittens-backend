@@ -10,8 +10,6 @@ class Game {
   deck: Deck;
   discardPile: Card[];
   turn: number;
-  // phase: Array<string>;
-  // currentPhase: string;
   numberOfPlayers: number;
   currentPlayerIndex: number;
   currentPlayer: Player;
@@ -112,9 +110,15 @@ class Game {
   async playCard(player: Player, cardIndex: number, requestPlayNopeCallback: (player: Player) => Promise<boolean>) {
     const playcard = player.getCardbyIndex(cardIndex);
     this.discardPile.push(playcard);
+    console.log(`${this.currentPlayer.name} plays ${playcard.getName}`)
     player.hand.splice(cardIndex, 1);
     this.lastPlayedCard = playcard;
 
+    //If player play Number Card Nope cannot be played.
+    if(playcard instanceof card.NumberCard){
+      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
+      return;
+    }
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
 
