@@ -5,6 +5,7 @@ class GameServer {
     game: Game;
     actionCallBack: () => Promise<any>;
     playNopeCallBack: () => Promise<any>;
+    requestCardCallBack: () => Promise<any>;
     // actionCallBack: Promise<number | null>;
     // playNopeCallBack: Promise<boolean>;
 
@@ -40,7 +41,7 @@ class GameServer {
             const cardIndex = await this.waitForPlayerAction();
 
             if (cardIndex !== null) {
-                await this.game.playCard(currentPlayer, cardIndex, this.requestPlayNope);
+                await this.game.playCard(currentPlayer, cardIndex, this.requestPlayNope, this.requestCardCallBack);
             } else {
                 this.game.drawCards();
                 this.game.nextTurn();
@@ -76,6 +77,19 @@ class GameServer {
             return response;
         }
         return false;
+    }
+
+    async requestFromNumberCard(player: Player): Promise<number | null> {
+        // Implement logic to request a player to request a card
+        // Return index of the card player chosen from target player if available
+
+        const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const response: number | null | undefined = await Promise.race([this.requestCardCallBack(), timeout]);
+        if (response) {
+            return response;
+        }
+        return null;
     }
 }
 

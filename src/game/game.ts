@@ -107,7 +107,7 @@ class Game {
   /**
    * Play cards
    */
-  async playCard(player: Player, cardIndex: number, requestPlayNopeCallback: (player: Player) => Promise<boolean>) {
+  async playCard(player: Player, cardIndex: number, requestPlayNopeCallback: (player: Player) => Promise<boolean>, requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>) {
     const playcard = player.getCardbyIndex(cardIndex);
     this.discardPile.push(playcard);
     console.log(`${this.currentPlayer.name} plays ${playcard.getName}`)
@@ -116,7 +116,7 @@ class Game {
 
     //If player play Number Card Nope cannot be played.
     if(playcard instanceof card.NumberCard){
-      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
+      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair(), requestCardFromPlayerCallback);
       return;
     }
     // Check if the next player wants to play a Nope card
@@ -245,7 +245,7 @@ class Game {
     this.currentPlayer.addCardToHand(chosenCard);
   }
 
-  async useNumberCard(player: Player, cardIndices: number[]) {
+  async useNumberCard(player: Player, cardIndices: number[], requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>) {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
       const card1 = player.getCardbyIndex(cardIndices[0]);
@@ -264,9 +264,8 @@ class Game {
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
   
-        // Use the pair effect (steal a random card from the target player)
-        const stolenCard = targetPlayer.giveRandomCard();
-        player.addCardToHand(stolenCard);
+        // Use the pair effect (steal a card from the target player)
+        this.requestCardFromPlayer(requestCardFromPlayerCallback ,player, targetPlayer)
       }
     }
   }
