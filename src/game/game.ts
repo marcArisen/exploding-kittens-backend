@@ -215,7 +215,7 @@ class Game {
    * Use See the future card effect.
    */
   useSeeTheFutureCard() {
-    this.deck.peek(3);
+    return this.deck.peek(3);
   }
 
   /**
@@ -241,7 +241,7 @@ class Game {
    * Use Favor card effect.
    */
   useFavorCard(targetPlayer: Player) {
-    const chosenCard = targetPlayer.giveRandomCard(); // Add a method to Player class to give a random card
+    const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
   }
 
@@ -293,6 +293,10 @@ class Game {
     const nextPlayerIndex = (currentIndex + 1) % this.players.length;
     this.currentPlayer = this.players[nextPlayerIndex];
     this.turn++;
+  }
+
+  nextPlayer(){
+    return this.players[this.currentPlayerIndex + 1];
   }
 
 }
