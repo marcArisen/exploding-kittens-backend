@@ -9,14 +9,6 @@ class SeeTheFutureCard extends Card {
   constructor() {
     super('See the Future', 'Action');
   }
-
-  /**
-   * Peek the first three card on the top of the deck
-   * @param {Game} game - Game's object
-   */
-  ability(game) {
-    game.deck.peek(3);
-  }
 }
 
 export default SeeTheFutureCard;
