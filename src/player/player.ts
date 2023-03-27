@@ -40,6 +40,7 @@ class Player {
    * @return {Number} - An number of Card in the player's hand.
    */
   getHandLength() {
+    
     return this.hand.length;
   }
 

@@ -1,4 +1,3 @@
-import { describe } from "node:test";
 import Deck from "../src/cards/models/deck";
 
 describe("Deck information", () => {
@@ -6,7 +5,7 @@ describe("Deck information", () => {
 
     test("total card in the deck",() =>{
         expect(deck.cards.length).toEqual(56)
-         }
+        }
     )
 
     test("shuffle work?",() =>{
@@ -32,5 +31,5 @@ describe("Deck information", () => {
         deck.generateBombedCat()
         expect(deck.cards.length).not.toEqual(deck_size)
     })
-    
+
 })
