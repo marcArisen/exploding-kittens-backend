@@ -68,7 +68,7 @@ class Game {
         const defuseIndex = this.currentPlayer.hasDefuseCard();
         if (defuseIndex >= 0) {
           // Use the Defuse card
-          console.log(`${this.currentPlayer.name} has a defuse card`)
+          console.log(`${this.currentPlayer.name} has a defuse card`);
           this.currentPlayer.hand.splice(defuseIndex, 1);
           this.discardPile.push(new card.DefuseCard());
           this.deck.addcards(new card.ExplodingKittenCard(), 1);
@@ -77,7 +77,7 @@ class Game {
         } else {
           // The player does not have a Defuse card and is eliminated
           this.AddDeadPlayer(this.currentPlayer);
-          console.log(`${this.currentPlayer.name} is dead`)
+          console.log(`${this.currentPlayer.name} is dead`);
           this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
@@ -107,21 +107,29 @@ class Game {
   /**
    * Play cards
    */
-  async playCard(player: Player, cardIndex: number, requestPlayNopeCallback: (player: Player) => Promise<boolean>, requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>) {
+  async playCard(
+    player: Player,
+    cardIndex: number,
+    requestPlayNopeCallback: (player: Player) => Promise<boolean>,
+    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
+  ) {
     const playcard = player.getCardbyIndex(cardIndex);
     this.discardPile.push(playcard);
-    console.log(`${this.currentPlayer.name} plays ${playcard.getName}`)
-    player.hand.splice(cardIndex, 1);
+    console.log(`${this.currentPlayer.name} plays ${playcard.getName}`);
+    player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = playcard;
 
     //If player play Number Card Nope cannot be played.
-    if(playcard instanceof card.NumberCard){
-      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair(), requestCardFromPlayerCallback);
+    if (playcard instanceof card.NumberCard) {
+      this.useNumberCard(
+        this.currentPlayer,
+        this.currentPlayer.hasPair(),
+        requestCardFromPlayerCallback,
+      );
       return;
     }
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
-
 
     if (nopeCardPlayed) {
       return;
@@ -156,7 +164,10 @@ class Game {
    * @param {number} nopeCount - The number of consecutive Nope cards played so far.
    * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
    */
-  async waitForNope(requestPlayNope: (player: Player) => Promise<boolean>, nopeCount = 0): Promise<boolean> {
+  async waitForNope(
+    requestPlayNope: (player: Player) => Promise<boolean>,
+    nopeCount = 0,
+  ): Promise<boolean> {
     let nopePlayed = false;
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -173,11 +184,10 @@ class Game {
         }
       }
     }
-      
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
-      const nopeCanceled = await this.waitForNope(requestPlayNope,nopeCount);
+      const nopeCanceled = await this.waitForNope(requestPlayNope, nopeCount);
       // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
       return !nopeCanceled;
     } else {
@@ -193,7 +203,7 @@ class Game {
   playNopeCard(player: Player, cardIndex: number) {
     const nopeCard = player.getCardbyIndex(cardIndex);
     this.discardPile.push(nopeCard);
-    player.hand.splice(cardIndex, 1);
+    player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = nopeCard;
   }
 
@@ -222,10 +232,10 @@ class Game {
    * Use Skip card effect.
    */
   useSkipCard() {
-    if(this.attackStack == 0){
+    if (this.attackStack == 0) {
       this.nextTurn();
-    }else{
-      this.attackStack --;
+    } else {
+      this.attackStack--;
     }
   }
 
@@ -245,12 +255,16 @@ class Game {
     this.currentPlayer.addCardToHand(chosenCard);
   }
 
-  async useNumberCard(player: Player, cardIndices: number[], requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>) {
+  async useNumberCard(
+    player: Player,
+    cardIndices: number[],
+    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
+  ) {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
       const card1 = player.getCardbyIndex(cardIndices[0]);
       const card2 = player.getCardbyIndex(cardIndices[1]);
-  
+
       if (
         card1 instanceof card.NumberCard &&
         card2 instanceof card.NumberCard &&
@@ -258,22 +272,25 @@ class Game {
       ) {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
-        player.hand.splice(cardIndices[1], 1);
-        player.hand.splice(cardIndices[0], 1);
-  
+        player.removeCardByIndex(cardIndices[0]);
+        player.removeCardByIndex(cardIndices[1]);
+
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
-  
+
         // Use the pair effect (steal a card from the target player)
-        this.requestCardFromPlayer(requestCardFromPlayerCallback ,player, targetPlayer)
+        this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
       }
     }
   }
-  
 
-  async requestCardFromPlayer(requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>, player: Player, targetPlayer: Player) {
+  async requestCardFromPlayer(
+    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
+    player: Player,
+    targetPlayer: Player,
+  ) {
     const cardIndex = await requestCardFromPlayerCallback(targetPlayer);
-  
+
     if (cardIndex >= 0) {
       // Take the chosen card from the target player's hand
       const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
@@ -282,8 +299,6 @@ class Game {
       // If the target player doesn't have any cards, nothing happens
     }
   }
-  
-
 
   /**
    * Move on to the next turn.
@@ -295,10 +310,9 @@ class Game {
     this.turn++;
   }
 
-  nextPlayer(){
+  nextPlayer() {
     return this.players[this.currentPlayerIndex + 1];
   }
-
 }
 
 export default Game;

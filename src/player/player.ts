@@ -40,7 +40,6 @@ class Player {
    * @return {Number} - An number of Card in the player's hand.
    */
   getHandLength() {
-    
     return this.hand.length;
   }
 
@@ -61,6 +60,14 @@ class Player {
     if (index > -1) {
       this.hand.splice(index, 1);
     }
+  }
+
+  /**
+   * Remove a card from the player's hand.
+   * @param {number} index - The index of card to remove from the player's hand.
+   */
+  removeCardByIndex(index: number) {
+    this.hand.splice(index, 1);
   }
 
   /**
@@ -95,39 +102,37 @@ class Player {
     return this.hand.findIndex((cards) => cards instanceof card.DefuseCard);
   }
 
-hasPair(): number[] {
-  const cardCounts: { [key: string]: number } = {};
+  hasPair(): number[] {
+    const cardCounts: { [key: string]: number } = {};
 
-  // Count the occurrences of each card rank in the player's hand
-  this.hand.forEach((cards) => {
-    if (cards instanceof card.NumberCard) {
-      const rank = cards.rank;
-      if (cardCounts.hasOwnProperty(rank)) {
-        cardCounts[rank]++;
-      } else {
-        cardCounts[rank] = 1;
-      }
-    }
-  });
-
-  // Check if there's any pair in the cardCounts
-  for (const rank in cardCounts) {
-    if (cardCounts[rank] >= 2) {
-      // Find the indices of the pair in the player's hand
-      const indices: number[] = [];
-      for (let i = 0; i < this.hand.length && indices.length < 2; i++) {
-        const cards = this.hand[i];
-        if (cards instanceof card.NumberCard && cards.rank === rank) {
-          indices.push(i);
+    // Count the occurrences of each card rank in the player's hand
+    this.hand.forEach((cards) => {
+      if (cards instanceof card.NumberCard) {
+        const rank = cards.rank;
+        if (cardCounts.hasOwnProperty(rank)) {
+          cardCounts[rank]++;
+        } else {
+          cardCounts[rank] = 1;
         }
       }
-      return indices;
+    });
+
+    // Check if there's any pair in the cardCounts
+    for (const rank in cardCounts) {
+      if (cardCounts[rank] >= 2) {
+        // Find the indices of the pair in the player's hand
+        const indices: number[] = [];
+        for (let i = 0; i < this.hand.length && indices.length < 2; i++) {
+          const cards = this.hand[i];
+          if (cards instanceof card.NumberCard && cards.rank === rank) {
+            indices.push(i);
+          }
+        }
+        return indices;
+      }
     }
+    return [];
   }
-  return [];
 }
-
-}
-
 
 export default Player;
