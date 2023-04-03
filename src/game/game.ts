@@ -34,6 +34,22 @@ class Game {
     this.lastPlayedCard = null;
   }
 
+  // TODO: dont forget this part, currently exposing all cards
+  getCurrentState() {
+    return {
+      players: this.players,
+      deck: this.deck,
+      discardPile: this.discardPile,
+      turn: this.turn,
+      numberOfPlayers: this.numberOfPlayers,
+      currentPlayerIndex: this.currentPlayerIndex,
+      currentPlayer: this.currentPlayer,
+      diedPlayer: this.diedPlayer,
+      attackStack: this.attackStack,
+      lastPlayedCard: this.lastPlayedCard,
+    }
+  }
+
   getPlayers() {
     return this.players;
   }

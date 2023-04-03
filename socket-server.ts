@@ -7,7 +7,6 @@ class SocketServer {
   gameInstances: Map<string, GameServer>;
 
   constructor() {
-    // initialize socketio and disable cors
     this.io = new Server({
       cors: {
         origin: '*',
@@ -21,7 +20,6 @@ class SocketServer {
 
   activateMiddleware() {
     this.io.use(async (socket: any, next: Function) => {
-      // middleware
       const token = socket.handshake.auth.token;
       socket.userName = token.name;
       socket.roomID = token.roomID;
@@ -29,80 +27,96 @@ class SocketServer {
     });
   }
 
+  handleConnection(socket: any) {
+    socket.join(socket.userName);
+    console.log(`${socket.userName} connected to the server`);
+  }
+
+  handleDisconnect(socket: any) {
+    const filteredPlayers: string[] = this.gameRoom
+      .get(socket.roomID)
+      ?.filter((value: any) => value !== socket.userName)!;
+    this.gameRoom.set(socket.roomID, filteredPlayers);
+    this.io.to(socket.roomID).emit('join room', this.gameRoom.get(socket.roomID));
+    console.log(`${socket.userName} disconnected to the server`);
+  }
+
+  handleJoinRoom(socket: any, roomID: string) {
+    if (this.gameRoom.has(roomID)) {
+      const currentGameRoom = this.gameRoom.get(roomID)!;
+      if (currentGameRoom.length < 4) {
+        currentGameRoom.push(socket.userName);
+        socket.join(roomID);
+        this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
+        console.log(socket.userName + ' join room: ' + roomID);
+      } else {
+        console.log(`room #${roomID} is already full...`);
+      }
+    } else {
+      this.gameRoom.set(roomID, [socket.userName]);
+      socket.join(roomID);
+      this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
+      console.log(`room #${roomID} is created by ${socket.userName}`);
+    }
+  }
+
+  handleMessage(socket: any, { message, roomID }: any, callback: Function) {
+    console.log('message: ' + message + ' in ' + roomID);
+    const outgoingMessage = {
+      name: socket.userName,
+      message,
+    };
+    this.io.to(roomID).emit('message', outgoingMessage);
+    callback({ status: 'ok' });
+  }
+
+  handleGameLoop(socket: any) {
+    if (this.gameRoom.has(socket.roomID)) {
+      const currentGameRoom = this.gameRoom.get(socket.roomID)!;
+      if (currentGameRoom.length === 4) {
+        const listOfPlayers = this.gameRoom.get(socket.roomID)!;
+        this.gameInstances.set(socket.roomID, new GameServer(listOfPlayers, this.io, socket.roomID));
+        console.log(this.gameInstances.get(socket.roomID)?.game);
+        this.gameInstances.get(socket.roomID)?.startGameLoop();
+        this.io.to(socket.roomID).emit('game', "ok");
+      } else {
+        console.log(`room #${socket.roomID} needs more player to join...`);
+      }
+    }
+  }
+
+  async actionCallBack() {
+    // Simulating a user action that can take up to 3 seconds
+    const randomDelay = Math.floor(Math.random() * 3000);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(`User action completed after ${randomDelay}ms`);
+      }, randomDelay);
+    });
+  }
+
   activateEventListener() {
     this.io.on('connection', (socket: any) => {
-      socket.join(socket.userName);
+      this.handleConnection(socket);
 
-      console.log(`${socket.userName} connected to the server`);
       socket.on('disconnect', () => {
-        var filteredPlayers: string[] = this.gameRoom
-          .get(socket.roomID)
-          ?.filter(function (value: any, index: any, arr: any) {
-            // delete user from the room
-            return value != socket.userName;
-          })!;
-        //   var updatedPlayers
-        this.gameRoom.set(socket.roomID, filteredPlayers);
-        this.io.to(socket.roomID).emit('join room', this.gameRoom.get(socket.roomID));
-        console.log(`${socket.userName} disconnected to the server`);
+        this.handleDisconnect(socket);
       });
 
       socket.on('join room', (roomID: string) => {
-        if (this.gameRoom.has(roomID)) {
-          const currentGameRoom = this.gameRoom.get(roomID)!;
-          // check if there is a room or not
-          if (currentGameRoom.length < 4) {
-            // check if the room is full or not
-            currentGameRoom.push(socket.userName);
-            socket.join(roomID);
-            this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
-            console.log(socket.userName + ' join room: ' + roomID);
-          } else {
-            console.log(`room #${roomID} is already full...`);
-          }
-        } else {
-          // otherwise, create new room
-          this.gameRoom.set(roomID, [socket.userName]);
-          socket.join(roomID);
-          this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
-          console.log(`room #${roomID} is created by ${socket.userName}`);
-        }
+        this.handleJoinRoom(socket, roomID);
       });
 
-      socket.on('message', ({ message, roomID }: any, callback: Function) => {
-        console.log('message: ' + message + ' in ' + roomID);
-
-        // generate data to send to receivers
-        const outgoingMessage = {
-          name: socket.userName,
-          message,
-        };
-        this.io.to(roomID).emit('message', outgoingMessage);
-        callback({
-          status: 'ok',
-        });
+      socket.on('message', (payload: any, callback: Function) => {
+        this.handleMessage(socket, payload, callback);
       });
 
-      /// TODO: on testing
-      socket.on('game start', (roomID: string) => {
-        if (this.gameRoom.has(roomID)) {
-          const currentGameRoom = this.gameRoom.get(roomID)!;
-          // check if there is a room or not
-          if (currentGameRoom.length == 4) {
-            // check if the room is full or not
-            var listOfPlayers = this.gameRoom.get(roomID)!;
-            this.gameInstances.set(roomID, new GameServer(listOfPlayers));
-            console.log(this.gameInstances.get(roomID)?.game);
-            console.log(this.gameInstances.get(roomID)?.startGameLoop());
-
-            // TODO: emit something to notify client that game started
-          } else {
-            console.log(`room #${roomID} needs more player to join...`);
-          }
-        }
+      socket.on('game loop', () => {
+        this.handleGameLoop(socket);
       });
     });
   }
 }
 
 export default SocketServer;
+
