@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "name": "exploding-kittens-backend",
+  "dependencies": {
+    "@types/node": { "version": "18.15.0" },
+    "express": { "version": "4.18.2" },
+    "socket.io-client": { "version": "4.6.1" },
+    "socket.io": { "version": "4.6.1" },
+    "ts-node": { "version": "10.9.1" }
+  }
+}

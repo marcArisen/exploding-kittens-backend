@@ -47,7 +47,7 @@ class Game {
       diedPlayer: this.diedPlayer,
       attackStack: this.attackStack,
       lastPlayedCard: this.lastPlayedCard,
-    }
+    };
   }
 
   getPlayers() {
@@ -129,15 +129,18 @@ class Game {
     requestPlayNopeCallback: (player: Player) => Promise<boolean>,
     requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
   ) {
+    if (cardIndex === null) {
+      return null;
+    }
     const playcard = player.getCardbyIndex(cardIndex);
-    this.discardPile.push(playcard);
-    console.log(`${this.currentPlayer.name} plays ${playcard.getName}`);
-    player.removeCardByIndex(cardIndex);
+    // this.discardPile.push(playcard);
+    console.log(`${this.currentPlayer.name} plays ${playcard.getName()}`);
+    // player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = playcard;
 
     //If player play Number Card Nope cannot be played.
     if (playcard instanceof card.NumberCard) {
-      this.useNumberCard(
+      await this.useNumberCard(
         this.currentPlayer,
         this.currentPlayer.hasPair(),
         requestCardFromPlayerCallback,
@@ -146,6 +149,9 @@ class Game {
     }
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
+
+    this.discardPile.push(playcard);
+    player.removeCardByIndex(cardIndex);
 
     if (nopeCardPlayed) {
       return;
@@ -190,6 +196,7 @@ class Game {
     for (const player of this.players) {
       // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
       if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
+        console.log(`${player.name} got the nope card`);
         const response = await Promise.race([requestPlayNope(player), timeout]);
         let nopeCardIndex = player.hasNopeCard();
         if (response) {
@@ -209,6 +216,7 @@ class Game {
     } else {
       // If nopePlayed is false, it means there were no more Nopes played
       // If nopeCount is odd, the original action is canceled
+      console.log(`no one plays nope card`);
       return nopeCount % 2 === 1;
     }
   }
@@ -227,7 +235,16 @@ class Game {
    * Choose a player for favor or other targetable effects.
    */
   choosePlayer(targetPlayer: Player) {
-    return targetPlayer;
+  
+    let randomIndex: number;
+    let randomPlayer: Player;
+  
+    do {
+      randomIndex = Math.floor(Math.random() * this.players.length);
+      randomPlayer = this.players[randomIndex];
+    } while (randomPlayer.name === targetPlayer.name);
+  
+    return randomPlayer;
   }
 
   /**
@@ -283,8 +300,7 @@ class Game {
 
       if (
         card1 instanceof card.NumberCard &&
-        card2 instanceof card.NumberCard &&
-        card1.rank === card2.rank
+        card2 instanceof card.NumberCard
       ) {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
@@ -295,21 +311,25 @@ class Game {
         const targetPlayer = this.choosePlayer(player);
 
         // Use the pair effect (steal a card from the target player)
-        this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
+        console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
+        await this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
       }
     }
   }
 
   async requestCardFromPlayer(
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
+    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<any>,
     player: Player,
     targetPlayer: Player,
   ) {
-    const cardIndex = await requestCardFromPlayerCallback(targetPlayer);
+    const cardIndex = await requestCardFromPlayerCallback(player);
 
-    if (cardIndex >= 0) {
+    // const cardIndex = 
+
+    if (cardIndex) {
       // Take the chosen card from the target player's hand
       const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
+      console.log(`player ${player.name} stole ${stolenCard}`);
       player.addCardToHand(stolenCard);
     } else {
       // If the target player doesn't have any cards, nothing happens

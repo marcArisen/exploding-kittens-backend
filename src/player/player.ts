@@ -4,7 +4,7 @@ import card from '../cards/models/card';
  * Represents a player in the game.
  */
 class Player {
-  name: String;
+  name: string;
   hand: Array<Card>;
   /**
    * Create a new player.
