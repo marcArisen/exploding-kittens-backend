@@ -235,15 +235,14 @@ class Game {
    * Choose a player for favor or other targetable effects.
    */
   choosePlayer(targetPlayer: Player) {
-  
     let randomIndex: number;
     let randomPlayer: Player;
-  
+
     do {
       randomIndex = Math.floor(Math.random() * this.players.length);
       randomPlayer = this.players[randomIndex];
     } while (randomPlayer.name === targetPlayer.name);
-  
+
     return randomPlayer;
   }
 
@@ -298,10 +297,7 @@ class Game {
       const card1 = player.getCardbyIndex(cardIndices[0]);
       const card2 = player.getCardbyIndex(cardIndices[1]);
 
-      if (
-        card1 instanceof card.NumberCard &&
-        card2 instanceof card.NumberCard
-      ) {
+      if (card1 instanceof card.NumberCard && card2 instanceof card.NumberCard) {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
         player.removeCardByIndex(cardIndices[0]);
@@ -324,7 +320,7 @@ class Game {
   ) {
     const cardIndex = await requestCardFromPlayerCallback(player);
 
-    // const cardIndex = 
+    // const cardIndex =
 
     if (cardIndex) {
       // Take the chosen card from the target player's hand

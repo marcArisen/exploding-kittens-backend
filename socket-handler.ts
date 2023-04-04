@@ -9,12 +9,17 @@ class SocketHandler {
     this.io = io;
   }
 
-  waitForClientAction(roomID: string, name: string, eventName: string, timeout: number): Promise<any> {
+  waitForClientAction(
+    roomID: string,
+    name: string,
+    eventName: string,
+    timeout: number,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout;
 
       const onEvent = (data: any) => {
-        console.log(`${this.socket.userName} select card index ${data}`)
+        console.log(`${this.socket.userName} select card index ${data}`);
         var room = this.socket.roomID;
         var userName = this.socket.userName;
         if (room === roomID && userName === name) {
@@ -40,7 +45,7 @@ class SocketHandler {
       const onEvent = () => {
         var room = this.socket.roomID;
         var userName = this.socket.userName;
-        console.log(`${this.socket.userName} play nope card!`)
+        console.log(`${this.socket.userName} play nope card!`);
         if (room === roomID && userName === name) {
           clearTimeout(timeoutId);
           this.socket.removeListener(eventName, onEvent);
@@ -57,12 +62,17 @@ class SocketHandler {
     });
   }
 
-  requestCardCallBack(roomID: string, name: string, eventName: string, timeout: number): Promise<any> {
+  requestCardCallBack(
+    roomID: string,
+    name: string,
+    eventName: string,
+    timeout: number,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout;
 
       const onEvent = (data: any) => {
-        console.log(`${this.socket.userName} select to steal index ${data}`)
+        console.log(`${this.socket.userName} select to steal index ${data}`);
         var room = this.socket.roomID;
         var userName = this.socket.userName;
         if (room === roomID && userName === name) {

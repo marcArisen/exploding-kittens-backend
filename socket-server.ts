@@ -82,7 +82,14 @@ class SocketServer {
         const listOfPlayers = this.gameRoom.get(socket.roomID)!;
         this.gameInstances.set(
           socket.roomID,
-          new GameServer(listOfPlayers, this.io, socket.roomID, this.actionCallBack.bind(this), this.playNopeCallBack.bind(this), this.requestCardCallBack.bind(this)),
+          new GameServer(
+            listOfPlayers,
+            this.io,
+            socket.roomID,
+            this.actionCallBack.bind(this),
+            this.playNopeCallBack.bind(this),
+            this.requestCardCallBack.bind(this),
+          ),
         );
         console.log(this.gameInstances.get(socket.roomID)?.game);
         this.gameInstances.get(socket.roomID)?.startGameLoop();
@@ -93,48 +100,49 @@ class SocketServer {
     }
   }
 
-  waitForClientAction(roomID: string, name: string, eventName: string, timeout: number): Promise<any> {
-  return new Promise((resolve, reject) => {
-    let timeoutId: NodeJS.Timeout;
+  waitForClientAction(
+    roomID: string,
+    name: string,
+    eventName: string,
+    timeout: number,
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout;
 
-    const onEvent = (data: any) => {
-      var room = data.roomID;
-      var userName = data.userName;
-      if (room === roomID && userName == name) {
-        clearTimeout(timeoutId);
+      const onEvent = (data: any) => {
+        var room = data.roomID;
+        var userName = data.userName;
+        if (room === roomID && userName == name) {
+          clearTimeout(timeoutId);
+          this.io.removeListener(eventName, onEvent);
+          resolve(data);
+        }
+      };
+
+      timeoutId = setTimeout(() => {
         this.io.removeListener(eventName, onEvent);
-        resolve(data);
-      }
-    };
+        resolve(null);
+      }, 4000);
 
-    timeoutId = setTimeout(() => {
-      this.io.removeListener(eventName, onEvent);
-      resolve(null);
-    }, 4000);
-
-    this.io.on(eventName, onEvent);
-  });
-  
-}
+      this.io.on(eventName, onEvent);
+    });
+  }
 
   actionCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.waitForClientAction(roomID, player, "action", 4900)
+    return this.socketList.get(player)!.waitForClientAction(roomID, player, 'action', 4900);
   }
 
   playNopeCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.playNopeCallBack(roomID, player, "action", 4900)
+    return this.socketList.get(player)!.playNopeCallBack(roomID, player, 'action', 4900);
   }
 
   requestCardCallBack(roomID: string, player: string) {
     console.log(`${player} picking the card`);
-    return this.socketList.get(player)!.requestCardCallBack(roomID, player, "request", 4900)
+    return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 4900);
   }
-
-
 
   activateEventListener() {
     this.io.on('connection', (socket: any) => {
-
       this.handleConnection(socket);
 
       socket.on('disconnect', () => {

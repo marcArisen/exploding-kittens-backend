@@ -9,7 +9,14 @@ class GameServer {
   io: any;
   roomNumber: string;
 
-  constructor(playerNames: string[], io: any, room: string, actionCallBack: (roomID: string, player: string) => Promise<any>, playNopeCallBack: (roomID: string, player: string) => Promise<any>, requestCardCallBack: (roomID: string, player: string) => Promise<any>) {
+  constructor(
+    playerNames: string[],
+    io: any,
+    room: string,
+    actionCallBack: (roomID: string, player: string) => Promise<any>,
+    playNopeCallBack: (roomID: string, player: string) => Promise<any>,
+    requestCardCallBack: (roomID: string, player: string) => Promise<any>,
+  ) {
     this.game = new Game(playerNames);
     this.io = io;
     this.actionCallBack = actionCallBack;
@@ -50,7 +57,7 @@ class GameServer {
       this.updateState(); // update the state through SocketIO
       console.log('===================');
       console.log(`It's ${currentPlayer.name}'s turn.`);
-      for (let i = 0; i < currentPlayer.hand.length; i++){
+      for (let i = 0; i < currentPlayer.hand.length; i++) {
         console.log(`${currentPlayer.hand[i].getName()}`);
       }
       console.log('===================');
@@ -64,10 +71,9 @@ class GameServer {
           this.requestPlayNope.bind(this),
           this.requestFromNumberCard.bind(this),
         );
-        
       }
-        this.game.drawCards();
-        this.game.nextTurn();
+      this.game.drawCards();
+      this.game.nextTurn();
     }
 
     // Announce the winner
