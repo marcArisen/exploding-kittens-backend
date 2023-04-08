@@ -130,13 +130,11 @@ class Game {
     requestPlayNopeCallback: (player: Player) => Promise<boolean>,
     requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
   ) {
-    if (cardIndex === null) {
+    if (cardIndex === -1) {
       return null;
     }
     const playcard = player.getCardbyIndex(cardIndex);
-    // this.discardPile.push(playcard);
     console.log(`${this.currentPlayer.name} plays ${playcard.getName()}`);
-    // player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = playcard;
 
     //If player play Number Card Nope cannot be played.
