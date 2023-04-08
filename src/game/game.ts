@@ -2,6 +2,7 @@ import Player from '../player/player';
 import Deck from '../cards/models/deck';
 import card from '../cards/models/card';
 import Card from '../cards/models/card-base';
+import { Socket } from 'socket.io';
 /**
  * Represents a game of Exploding Kittens.
  */
@@ -165,14 +166,17 @@ class Game {
     //See the future Card effect
     else if (playcard instanceof card.SeeTheFutureCard) {
       this.useSeeTheFutureCard();
+      console.log(this.useSeeTheFutureCard());
     }
     //Attack Card effect
     else if (playcard instanceof card.AttackCard) {
       this.useAttackCard();
+      return true;
     }
     //Skip Card effect
     else if (playcard instanceof card.SkipCard) {
       this.useSkipCard();
+      return true;
     }
     //Favor Card effect
     else if (playcard instanceof card.FavorCard) {
@@ -232,7 +236,7 @@ class Game {
   }
 
   /**
-   * Choose a player for favor or other targetable effects.
+   *R
    */
   choosePlayer(targetPlayer: Player) {
     let randomIndex: number;
@@ -285,6 +289,7 @@ class Game {
   useFavorCard(targetPlayer: Player) {
     const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
+    console.log(`${this.currentPlayer.name} got ${chosenCard.name} from ${targetPlayer.name}`);
   }
 
   async useNumberCard(
@@ -294,6 +299,7 @@ class Game {
   ) {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
+      console.log(`${player.name} got 2 cards`);
       const card1 = player.getCardbyIndex(cardIndices[0]);
       const card2 = player.getCardbyIndex(cardIndices[1]);
 
@@ -301,7 +307,7 @@ class Game {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
         player.removeCardByIndex(cardIndices[0]);
-        player.removeCardByIndex(cardIndices[1]);
+        player.removeCardByIndex(cardIndices[1]-1); // TODO: Fix this hardcode
 
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
@@ -310,6 +316,9 @@ class Game {
         console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         await this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
       }
+    }
+    else{
+    console.log(`player doesn't have the same 2 cards`);
     }
   }
 
@@ -322,13 +331,14 @@ class Game {
 
     // const cardIndex =
 
-    if (cardIndex) {
+    if (cardIndex != null) {
       // Take the chosen card from the target player's hand
       const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
-      console.log(`player ${player.name} stole ${stolenCard}`);
+      console.log(`player ${player.name} stole ${stolenCard.name}`);
       player.addCardToHand(stolenCard);
     } else {
       // If the target player doesn't have any cards, nothing happens
+      console.log('player doesnt have any card');
     }
   }
 

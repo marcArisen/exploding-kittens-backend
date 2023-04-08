@@ -52,6 +52,7 @@ class GameServer {
    * Starts the game loop and manages the game state.
    */
   async startGameLoop() {
+    var effect; // card effect
     while (this.game.diedPlayer.length < 3) {
       const currentPlayer = this.game.currentPlayer;
       this.updateState(); // update the state through SocketIO
@@ -65,15 +66,19 @@ class GameServer {
       const cardIndex = await this.waitForPlayerAction(currentPlayer.name);
 
       if (cardIndex !== null) {
-        await this.game.playCard(
+        effect = await this.game.playCard(
           currentPlayer,
           cardIndex,
           this.requestPlayNope.bind(this),
           this.requestFromNumberCard.bind(this),
         );
       }
+      if (effect !== true){
       this.game.drawCards();
       this.game.nextTurn();
+      }
+
+      effect = false;
     }
 
     // Announce the winner
