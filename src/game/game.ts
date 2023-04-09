@@ -147,12 +147,11 @@ class Game {
       this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
       return;
     }
-    // Check if the next player wants to play a Nope card
-    const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
-
     this.discardPile.push(playcard);
     player.removeCardByIndex(cardIndex);
-
+    // Check if the next player wants to play a Nope card
+    const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
+    console.log(nopeCardPlayed);
     if (nopeCardPlayed) {
       return;
     }
@@ -192,19 +191,25 @@ class Game {
   async waitForNope(
     requestPlayNope: (player: Player) => Promise<boolean>,
     nopeCount = 0,
+    lastNopePlayer: Player = this.currentPlayer,
   ): Promise<boolean> {
     let nopePlayed = false;
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
     for (const player of this.players) {
-      // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
-      if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
+      if (player === lastNopePlayer) {
+        continue;
+      }
+
+      const nopeCardIndex = player.hasNopeCard();
+      if (nopeCardIndex >= 0) {
         console.log(`${player.name} got the nope card`);
         const response = await Promise.race([requestPlayNope(player), timeout]);
-        let nopeCardIndex = player.hasNopeCard();
         if (response) {
+          console.log(`${player.name} plays nope card`);
           nopePlayed = true;
           nopeCount++;
+          lastNopePlayer = player;
           this.playNopeCard(player, nopeCardIndex);
           break;
         }
@@ -213,9 +218,9 @@ class Game {
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
-      const nopeCanceled = await this.waitForNope(requestPlayNope, nopeCount);
+      const nopeCanceled = await this.waitForNope(requestPlayNope, nopeCount, lastNopePlayer);
       // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
-      return !nopeCanceled;
+      return nopeCanceled;
     } else {
       // If nopePlayed is false, it means there were no more Nopes played
       // If nopeCount is odd, the original action is canceled
@@ -229,6 +234,7 @@ class Game {
    */
   playNopeCard(player: Player, cardIndex: number) {
     const nopeCard = player.getCardbyIndex(cardIndex);
+    console.log(`Player ${player.name} plays a Nope card`);
     this.discardPile.push(nopeCard);
     player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = nopeCard;
@@ -333,7 +339,7 @@ class Game {
   }
 
   nextPlayer() {
-    return this.players[(this.currentPlayerIndex + 1)%this.players.length];
+    return this.players[(this.currentPlayerIndex + 1) % this.players.length];
   }
 }
 

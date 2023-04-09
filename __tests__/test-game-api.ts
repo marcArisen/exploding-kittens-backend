@@ -86,6 +86,13 @@ describe('Game', () => {
     game.drawCards();
     expect(game.currentPlayer.hand.length).toBe(initialHandSize + 1);
     expect(game.deck.cards.length).toBe(initialDeckSize - 1);
+
+    const updateDeckSize = game.deck.cards.length;
+    const updatedHandSize = game.currentPlayer.getHandLength();
+    game.attackStack = 1;
+    game.drawCards();
+    expect(game.currentPlayer.hand.length).toBe(updatedHandSize + 2);
+    expect(game.deck.cards.length).toBe(updateDeckSize - 2);
   });
 
   it('should explode when an exploding kitten card is drawn', () => {
@@ -230,28 +237,34 @@ describe('Game', () => {
   it('Play a NumberCard', async () => {
     game.currentPlayer.addCardToHand(new card.NumberCard('Beard Cat'));
     game.currentPlayer.addCardToHand(new card.NumberCard('Beard Cat'));
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NumberCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Beard Cat');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
   });
-  
+
   it('Play a ShuffleCard', async () => {
     game.currentPlayer.addCardToHand(new card.ShuffleCard());
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.ShuffleCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Shuffle');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
   });
-  
+
   it('Play a NopeCard', async () => {
     game.currentPlayer.addCardToHand(new card.NopeCard());
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
@@ -259,9 +272,11 @@ describe('Game', () => {
 
   it('Play a See The Future Card', async () => {
     game.currentPlayer.addCardToHand(new card.SeeTheFutureCard());
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.SeeTheFutureCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('See the Future');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
@@ -269,9 +284,11 @@ describe('Game', () => {
 
   it('Play a SkipCard', async () => {
     game.currentPlayer.addCardToHand(new card.SkipCard());
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.SkipCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Skip');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
@@ -279,22 +296,39 @@ describe('Game', () => {
 
   it('Play a FavorCard', async () => {
     game.currentPlayer.addCardToHand(new card.FavorCard());
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(false));
-  
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
+      Promise.resolve(false),
+    );
+
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.FavorCard);
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Favor');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
   });
+  it('Action card effect should not work when Nope card is played', async () => {
+    game.currentPlayer.addCardToHand(new card.AttackCard());
+    let nopePlayer = game.nextPlayer();
+    nopePlayer.addCardToHand(new card.NopeCard());
+    console.log('Game state:', game.getCurrentState());
+    // Mock the requestPlayNopeCallback to return true only for the nopePlayer
+    const mockRequestPlayNopeCallback = async (player: Player) => {
+      return player !== game.currentPlayer;
+    };
 
-  it('Play a FavorCard but noped', async () => {
-    game.currentPlayer.addCardToHand(new card.FavorCard());
-  
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () => Promise.resolve(true));
-  
-    expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.FavorCard);
-    expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Favor');
-    expect(game.currentPlayer.getHandLength()).toEqual(0);
+    // Play the AttackCard
+    await game.playCard(
+      game.currentPlayer,
+      game.currentPlayer.hand.length - 1,
+      mockRequestPlayNopeCallback,
+    );
+
+    // Check if the last card in the discardPile is the Nope card
+    console.log('Game state:', game.getCurrentState());
+    console.log('Discard pile:', game.discardPile);
+    expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
+    expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
+
+    // Check if the action card effect is not applied (attackStack remains 0)
+    expect(game.attackStack).toBe(0);
   });
-
 });
