@@ -319,8 +319,6 @@ class Game {
         console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         this.useFavorCard(targetPlayer);
       }
-    } else {
-      console.log(`player doesn't have the same 2 cards`);
     }
   }
 
@@ -335,7 +333,7 @@ class Game {
   }
 
   nextPlayer() {
-    return this.players[this.currentPlayerIndex + 1];
+    return this.players[(this.currentPlayerIndex + 1)%this.players.length];
   }
 }
 
