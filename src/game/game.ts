@@ -17,12 +17,13 @@ class Game {
   diedPlayer: Player[];
   attackStack: number;
   lastPlayedCard: any;
+  gameLogCallback: any;
 
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
    */
-  constructor(playerNames: any) {
+  constructor(playerNames: any, gameLogCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
     this.deck = new Deck();
     this.discardPile = [];
@@ -33,6 +34,7 @@ class Game {
     this.diedPlayer = [];
     this.attackStack = 0;
     this.lastPlayedCard = null;
+    this.gameLogCallback = gameLogCallback;
   }
 
   // TODO: dont forget this part, currently exposing all cards
@@ -81,10 +83,12 @@ class Game {
     for (let i = 0; i < drawCount; i++) {
       const drawnCard = this.deck.draw();
       if (drawnCard instanceof card.ExplodingKittenCard) {
+        this.gameLogCallback(`${this.currentPlayer.name} gets an Exploding Kitten Card`);
         console.log(`${this.currentPlayer.name} gets an Exploding Kitten Card`);
         const defuseIndex = this.currentPlayer.hasDefuseCard();
         if (defuseIndex >= 0) {
           // Use the Defuse card
+          this.gameLogCallback(`${this.currentPlayer.name} has a defuse card`);
           console.log(`${this.currentPlayer.name} has a defuse card`);
           this.currentPlayer.hand.splice(defuseIndex, 1);
           this.discardPile.push(new card.DefuseCard());
@@ -94,6 +98,7 @@ class Game {
         } else {
           // The player does not have a Defuse card and is eliminated
           this.AddDeadPlayer(this.currentPlayer);
+          this.gameLogCallback(`${this.currentPlayer.name} is dead`);
           console.log(`${this.currentPlayer.name} is dead`);
           this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
@@ -134,6 +139,7 @@ class Game {
       return null;
     }
     const playcard = player.getCardbyIndex(cardIndex);
+    this.gameLogCallback(`${this.currentPlayer.name} plays ${playcard.getName()}`);
     console.log(`${this.currentPlayer.name} plays ${playcard.getName()}`);
     this.lastPlayedCard = playcard;
 
@@ -164,7 +170,7 @@ class Game {
     //See the future Card effect
     else if (playcard instanceof card.SeeTheFutureCard) {
       this.useSeeTheFutureCard();
-      console.log(this.useSeeTheFutureCard());
+      // console.log(this.useSeeTheFutureCard());
     }
     //Attack Card effect
     else if (playcard instanceof card.AttackCard) {
@@ -287,7 +293,8 @@ class Game {
   useFavorCard(targetPlayer: Player) {
     const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
-    console.log(`${this.currentPlayer.name} got ${chosenCard.name} from ${targetPlayer.name}`);
+    this.gameLogCallback(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
+    console.log(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
   }
 
   async useNumberCard(
@@ -311,6 +318,7 @@ class Game {
         const targetPlayer = this.choosePlayer(player);
 
         // Use the pair effect (steal a card from the target player)
+        this.gameLogCallback(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         await this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
       }

@@ -17,7 +17,7 @@ class GameServer {
     playNopeCallBack: (roomID: string, player: string) => Promise<any>,
     requestCardCallBack: (roomID: string, player: string) => Promise<any>,
   ) {
-    this.game = new Game(playerNames);
+    this.game = new Game(playerNames, this.updateGamelog.bind(this));
     this.io = io;
     this.actionCallBack = actionCallBack;
     this.playNopeCallBack = playNopeCallBack;
@@ -48,6 +48,10 @@ class GameServer {
     this.io.to(this.roomNumber).emit('game state', this.game.getCurrentState());
   }
 
+  updateGamelog(text: string) {
+    this.io.to(this.roomNumber).emit('game log', text);
+  }
+
   /**
    * Starts the game loop and manages the game state.
    */
@@ -57,6 +61,7 @@ class GameServer {
       const currentPlayer = this.game.currentPlayer;
       this.updateState(); // update the state through SocketIO
       console.log('===================');
+      this.updateGamelog(`It's ${currentPlayer.name}'s turn.`);
       console.log(`It's ${currentPlayer.name}'s turn.`);
       for (let i = 0; i < currentPlayer.hand.length; i++) {
         console.log(`${currentPlayer.hand[i].getName()}`);
