@@ -26,18 +26,12 @@ class GameServer {
     this.initialize();
   }
 
-  // Function for Testing (need to remove after production)
-  async testFunc() {
-    return new Promise((resolve) => setTimeout(resolve, 6000));
-  }
-
   initialize() {
     this.game.dealCards();
     this.game.addExplodingKittenCard();
     this.game.givePlayerDefuseCard();
   }
 
-  // TODO: haven't done -/-'
   updateState() {
     // const outgoingMessage = {
     //   name: "game",

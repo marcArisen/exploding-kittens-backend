@@ -108,9 +108,9 @@ describe('Game', () => {
   });
 
   it('should choose player', () => {
-    const targetPlayer = game.nextPlayer();
+    const targetPlayer = game.currentPlayer;
     const chosenPlayer = game.choosePlayer(targetPlayer);
-    expect(targetPlayer).toBe(chosenPlayer);
+    expect(targetPlayer).not.toBe(chosenPlayer);
   });
 
   it('should play nope card', () => {

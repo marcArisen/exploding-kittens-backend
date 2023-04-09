@@ -240,16 +240,16 @@ class Game {
   }
 
   /**
-   *R
+   *Random target player (as for now)
    */
-  choosePlayer(targetPlayer: Player) {
+  choosePlayer(player: Player) {
     let randomIndex: number;
     let randomPlayer: Player;
 
     do {
       randomIndex = Math.floor(Math.random() * this.players.length);
       randomPlayer = this.players[randomIndex];
-    } while (randomPlayer.name === targetPlayer.name);
+    } while (randomPlayer.name === player.name);
 
     return randomPlayer;
   }
