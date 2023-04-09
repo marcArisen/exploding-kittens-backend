@@ -24,3 +24,23 @@ jobs:
       - name: Test
         run: |
           npm test
+
+  sonarqube:
+    needs: test
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage report artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-report
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
