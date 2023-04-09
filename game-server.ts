@@ -72,11 +72,11 @@ class GameServer {
           this.requestFromNumberCard.bind(this),
         );
       }
-      if (effect === true){
-      this.game.nextTurn();
+      if (effect === true) {
+        this.game.nextTurn();
       }
       effect = false; // reset the effect
-      if (cardIndex === -1 || cardIndex === null){
+      if (cardIndex === -1 || cardIndex === null) {
         this.game.drawCards();
         this.game.nextTurn();
       }

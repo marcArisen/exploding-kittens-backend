@@ -133,7 +133,6 @@ class Game {
     player: Player,
     cardIndex: number,
     requestPlayNopeCallback: (player: Player) => Promise<boolean>,
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
   ) {
     if (cardIndex === -1) {
       return null;
@@ -145,11 +144,7 @@ class Game {
 
     //If player play Number Card Nope cannot be played.
     if (playcard instanceof card.NumberCard) {
-      await this.useNumberCard(
-        this.currentPlayer,
-        this.currentPlayer.hasPair(),
-        requestCardFromPlayerCallback,
-      );
+      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
       return;
     }
     // Check if the next player wants to play a Nope card
@@ -297,11 +292,7 @@ class Game {
     console.log(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
   }
 
-  async useNumberCard(
-    player: Player,
-    cardIndices: number[],
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
-  ) {
+  useNumberCard(player: Player, cardIndices: number[]) {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
       console.log(`${player.name} got 2 cards`);
@@ -312,7 +303,7 @@ class Game {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
         player.removeCardByIndex(cardIndices[0]);
-        player.removeCardByIndex(cardIndices[1]-1); // TODO: Fix this hardcode
+        player.removeCardByIndex(cardIndices[1] - 1); // TODO: Fix this hardcode
 
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
@@ -320,31 +311,10 @@ class Game {
         // Use the pair effect (steal a card from the target player)
         this.gameLogCallback(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
-        await this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
+        this.useFavorCard(targetPlayer);
       }
-    }
-    else{
-    console.log(`player doesn't have the same 2 cards`);
-    }
-  }
-
-  async requestCardFromPlayer(
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<any>,
-    player: Player,
-    targetPlayer: Player,
-  ) {
-    const cardIndex = await requestCardFromPlayerCallback(player);
-
-    // const cardIndex =
-
-    if (cardIndex != null) {
-      // Take the chosen card from the target player's hand
-      const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
-      console.log(`player ${player.name} stole ${stolenCard.name}`);
-      player.addCardToHand(stolenCard);
     } else {
-      // If the target player doesn't have any cards, nothing happens
-      console.log('player doesnt have any card');
+      console.log(`player doesn't have the same 2 cards`);
     }
   }
 
