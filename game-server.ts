@@ -69,7 +69,6 @@ class GameServer {
           currentPlayer,
           cardIndex,
           this.requestPlayNope.bind(this),
-          this.requestFromNumberCard.bind(this),
         );
       }
       if (effect === true) {
