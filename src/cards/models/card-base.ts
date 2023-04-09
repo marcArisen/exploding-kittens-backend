@@ -2,8 +2,8 @@
  * Represents a card in the game.
  */
 class Card {
-  name: String;
-  type: String;
+  name: string;
+  type: string;
   /**
    * Create a new Card.
    * @param {string} name - The name of the card.

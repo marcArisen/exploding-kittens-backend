@@ -286,6 +286,11 @@ class Game {
    * Use Favor card effect.
    */
   useFavorCard(targetPlayer: Player) {
+    if (targetPlayer.getHandLength() == 0) {
+      console.log(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
+      console.log(`${targetPlayer.name} does not have any card`);
+      return;
+    }
     const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
     this.gameLogCallback(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
@@ -296,6 +301,7 @@ class Game {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
       console.log(`${player.name} got 2 cards`);
+      cardIndices.sort((a, b) => a - b);
       const card1 = player.getCardbyIndex(cardIndices[0]);
       const card2 = player.getCardbyIndex(cardIndices[1]);
 

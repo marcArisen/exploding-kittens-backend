@@ -6,6 +6,7 @@ import card from '../cards/models/card';
 class Player {
   name: string;
   hand: Array<Card>;
+  handString: Array<string>;
   /**
    * Create a new player.
    * @param {string} name - The name of the player.
@@ -13,6 +14,7 @@ class Player {
   constructor(name: string) {
     this.name = name;
     this.hand = [];
+    this.handString = [];
   }
 
   /**
@@ -29,6 +31,15 @@ class Player {
    */
   getHand() {
     return this.hand;
+  }
+
+  /**
+   * Get the player's hand string.
+   * @return {string[]} - An array of Card string representing the player's hand.
+   */
+  getHandString(): string[] {
+    this.handString = this.hand.map((card) => card.getName());
+    return this.handString;
   }
 
   getCardbyIndex(index: number) {

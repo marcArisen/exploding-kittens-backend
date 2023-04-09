@@ -69,7 +69,6 @@ class GameServer {
           currentPlayer,
           cardIndex,
           this.requestPlayNope.bind(this),
-          this.requestFromNumberCard.bind(this),
         );
       }
       if (effect === true) {
@@ -117,22 +116,6 @@ class GameServer {
       return response;
     }
     return false;
-  }
-
-  async requestFromNumberCard(player: Player): Promise<number> {
-    // Implement logic to request a player to request a card
-    // Return index of the card player chosen from target player if available
-
-    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
-
-    const response: number | null | undefined = await Promise.race([
-      this.requestCardCallBack(this.roomNumber, player.name),
-      timeout,
-    ]);
-    if (response != null) {
-      return response;
-    }
-    return -1;
   }
 }
 
