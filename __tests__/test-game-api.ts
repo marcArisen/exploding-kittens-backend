@@ -8,7 +8,7 @@ describe('Game', () => {
 
   beforeEach(() => {
     playerNames = ['Alice', 'Bob', 'Charlie', 'David'];
-    game = new Game(playerNames);
+    game = new Game(playerNames, () => {});
   });
 
   it('should create a new game with the specified players', () => {
