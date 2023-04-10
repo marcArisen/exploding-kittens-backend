@@ -18,6 +18,7 @@ class Game {
   attackStack: number;
   lastPlayedCard: any;
   gameLogCallback: any;
+  allPlayers: Player[];
 
   /**
    * Create a new game with the specified players.
@@ -25,6 +26,7 @@ class Game {
    */
   constructor(playerNames: any, gameLogCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
+    this.allPlayers = playerNames.map((name: string) => new Player(name));
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
@@ -50,6 +52,7 @@ class Game {
       diedPlayer: this.diedPlayer,
       attackStack: this.attackStack,
       lastPlayedCard: this.lastPlayedCard,
+      allPlayers: this.allPlayers,
     };
   }
 
@@ -100,6 +103,7 @@ class Game {
           this.AddDeadPlayer(this.currentPlayer);
           this.gameLogCallback(`${this.currentPlayer.name} is dead`);
           console.log(`${this.currentPlayer.name} is dead`);
+          this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
       } else {

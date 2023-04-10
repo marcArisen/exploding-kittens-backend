@@ -179,6 +179,7 @@ describe('Game', () => {
   it('should return the current game state', () => {
     // Set up the game state
     const currentPlayer = game.currentPlayer;
+    const allPlayers = game.allPlayers;
     const currentPlayerIndex = game.players.findIndex((player) => player === currentPlayer);
     const lastPlayedCard = new card.AttackCard();
     const numberOfPlayers = game.players.length;
@@ -200,6 +201,7 @@ describe('Game', () => {
     expect(currentState.diedPlayer).toEqual(game.diedPlayer);
     expect(currentState.attackStack).toBe(game.attackStack);
     expect(currentState.lastPlayedCard).toBe(lastPlayedCard);
+    expect(currentState.allPlayers).toBe(allPlayers);
   });
 
   it('should use number card and trigger its effect', () => {
@@ -358,5 +360,4 @@ describe('Game', () => {
     // Check if the action card effect is not applied (attackStack remains 0)
     expect(game.attackStack).toBe(0);
   });
-  
 });
