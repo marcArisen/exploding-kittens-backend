@@ -49,7 +49,7 @@ class SocketServer {
   handleJoinRoom(socket: any, roomID: string) {
     if (this.gameRoom.has(roomID)) {
       const currentGameRoom = this.gameRoom.get(roomID)!;
-      if (currentGameRoom.length < 4) {
+      if (currentGameRoom && currentGameRoom.length < 4) {
         currentGameRoom.push(socket.userName);
         socket.join(roomID);
         this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
@@ -65,14 +65,13 @@ class SocketServer {
     }
   }
 
-  handleMessage(socket: any, { message, roomID }: any, callback: Function) {
-    console.log('message: ' + message + ' in ' + roomID);
+  handleMessage(socket: any, message: string) {
     const outgoingMessage = {
       name: socket.userName,
       message,
     };
-    this.io.to(roomID).emit('message', outgoingMessage);
-    callback({ status: 'ok' });
+    console.log(outgoingMessage);
+    this.io.to(socket.roomID).emit('message', outgoingMessage);
   }
 
   handleGameLoop(socket: any) {
@@ -153,8 +152,8 @@ class SocketServer {
         this.handleJoinRoom(socket, roomID);
       });
 
-      socket.on('message', (payload: any, callback: Function) => {
-        this.handleMessage(socket, payload, callback);
+      socket.on('message', (msg: any) => {
+        this.handleMessage(socket, msg);
       });
 
       socket.on('game loop', () => {
