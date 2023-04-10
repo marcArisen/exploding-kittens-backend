@@ -251,7 +251,7 @@ class Game {
     } else {
       // If nopePlayed is false, it means there were no more Nopes played
       // If nopeCount is odd, the original action is canceled
-      this.gameLogCallback(`no one plays nope card`);
+      if (nopeCount % 2 === 1) { this.gameLogCallback(`card effect is canceled by nope`) };
       return nopeCount % 2 === 1;
     }
   }
