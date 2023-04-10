@@ -100,7 +100,6 @@ class Game {
           this.AddDeadPlayer(this.currentPlayer);
           this.gameLogCallback(`${this.currentPlayer.name} is dead`);
           console.log(`${this.currentPlayer.name} is dead`);
-          this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
       } else {

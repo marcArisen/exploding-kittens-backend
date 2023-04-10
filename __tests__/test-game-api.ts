@@ -331,4 +331,32 @@ describe('Game', () => {
     // Check if the action card effect is not applied (attackStack remains 0)
     expect(game.attackStack).toBe(0);
   });
+
+  it('Action card effect should work when Doubled Nope card is played', async () => {
+    game.currentPlayer.addCardToHand(new card.AttackCard());
+    let nopePlayer = game.nextPlayer();
+    nopePlayer.addCardToHand(new card.NopeCard());
+    console.log('Game state:', game.getCurrentState());
+    // Mock the requestPlayNopeCallback to return true only for the nopePlayer
+    const mockRequestPlayNopeCallback = async (player: Player) => {
+      return player !== game.currentPlayer;
+    };
+
+    // Play the AttackCard
+    await game.playCard(
+      game.currentPlayer,
+      game.currentPlayer.hand.length - 1,
+      mockRequestPlayNopeCallback,
+    );
+
+    // Check if the last card in the discardPile is the Nope card
+    console.log('Game state:', game.getCurrentState());
+    console.log('Discard pile:', game.discardPile);
+    expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
+    expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
+
+    // Check if the action card effect is not applied (attackStack remains 0)
+    expect(game.attackStack).toBe(0);
+  });
+  
 });
