@@ -139,7 +139,6 @@ class Game {
     updateStateCallback: Function,
     notifyNopeCallback: Function,
   ) {
-    this.lastNopePlayer = this.currentPlayer;
     if (cardIndex === -1) {
       return null;
     }
@@ -356,6 +355,7 @@ class Game {
     const nextPlayerIndex = (currentIndex + 1) % this.players.length;
     this.currentPlayer = this.players[nextPlayerIndex];
     this.turn++;
+    this.lastNopePlayer = this.currentPlayer;
   }
 
   nextPlayer() {
