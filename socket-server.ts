@@ -132,7 +132,7 @@ class SocketServer {
   }
 
   playNopeCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.playNopeCallBack(roomID, player, 'action', 4900);
+    return this.socketList.get(player)!.playNopeCallBack(roomID, player, 'nope', 4900);
   }
 
   requestCardCallBack(roomID: string, player: string) {
