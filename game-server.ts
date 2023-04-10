@@ -68,11 +68,12 @@ class GameServer {
       // if (effect === true) {
       //   this.game.nextTurn();
       // }
-      effect = false; // reset the effect
-      if (cardIndex === -1 || cardIndex === null) {
+      // effect = false; // reset the effect
+      if (effect == false || cardIndex === -1 || cardIndex === null) {
         this.game.drawCards();
         this.game.nextTurn();
       }
+      effect = false; // reset the effect
     }
 
     // Announce the winner
