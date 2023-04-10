@@ -247,6 +247,7 @@ class Game {
       // If nopePlayed is false, it means there were no more Nopes played
       // If nopeCount is odd, the original action is canceled
       console.log(`no one plays nope card`);
+      this.gameLogCallback(`no one plays nope card`);
       return nopeCount % 2 === 1;
     }
   }
@@ -306,6 +307,9 @@ class Game {
    * Use Attack card effect.
    */
   useAttackCard() {
+    if (this.attackStack > 0){
+      this.gameLogCallback(`attack stack is ${this.attackStack} draws`);
+    }
     this.attackStack++;
     this.nextTurn();
   }
