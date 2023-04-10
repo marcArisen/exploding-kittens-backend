@@ -45,11 +45,11 @@ class GameServer {
   }
 
   notifySeeFuture(socketName: string, cards: any) {
-    this.io.to(this.roomNumber).to(socketName).emit('see future', cards);
+    this.io.to(socketName).emit('see future', cards);
   }
 
   notifyGetRandomCard(socketName: string) {
-    this.io.to(this.roomNumber).to(socketName).emit('random card', true);
+    this.io.to(socketName).emit('random card', true);
   }
 
   /**
