@@ -40,6 +40,10 @@ class GameServer {
     this.io.to(this.roomNumber).emit('game log', text);
   }
 
+  notifyNope() {
+    this.io.to(this.roomNumber).emit('after nope', true);
+  }
+
   /**
    * Starts the game loop and manages the game state.
    */
@@ -48,13 +52,7 @@ class GameServer {
     while (this.game.diedPlayer.length < 3) {
       const currentPlayer = this.game.currentPlayer;
       this.updateState(); // update the state through SocketIO
-      console.log('===================');
       this.updateGamelog(`It's ${currentPlayer.name}'s turn.`);
-      console.log(`It's ${currentPlayer.name}'s turn.`);
-      for (let i = 0; i < currentPlayer.hand.length; i++) {
-        console.log(`${currentPlayer.hand[i].getName()}`);
-      }
-      console.log('===================');
       // Give player 5 seconds to play an action card
       const cardIndex = await this.waitForPlayerAction(currentPlayer.name);
 
@@ -64,6 +62,7 @@ class GameServer {
           cardIndex,
           this.requestPlayNope.bind(this),
           this.updateState.bind(this),
+          this.notifyNope.bind(this),
         );
       }
 
@@ -75,7 +74,7 @@ class GameServer {
     }
 
     // Announce the winner
-    console.log(`The game is over. ${this.game.currentPlayer.name} wins!`);
+    this.updateGamelog(`The game is over. ${this.game.currentPlayer.name} wins!`);
   }
 
   async waitForPlayerAction(player: string): Promise<number | null> {
