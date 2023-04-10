@@ -33,12 +33,6 @@ class GameServer {
   }
 
   updateState() {
-    // const outgoingMessage = {
-    //   name: "game",
-    //   message: JSON.stringify(this.game.getCurrentState()),
-    // };
-    // this.io.to(this.roomNumber).emit('message', outgoingMessage)
-
     this.io.to(this.roomNumber).emit('game state', this.game.getCurrentState());
   }
 
@@ -71,9 +65,9 @@ class GameServer {
           this.requestPlayNope.bind(this),
         );
       }
-      if (effect === true) {
-        this.game.nextTurn();
-      }
+      // if (effect === true) {
+      //   this.game.nextTurn();
+      // }
       effect = false; // reset the effect
       if (cardIndex === -1 || cardIndex === null) {
         this.game.drawCards();
@@ -90,7 +84,7 @@ class GameServer {
     // If the player plays a card within the time limit, return the card index
     // If not, return null
 
-    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+    const timeout = new Promise((resolve) => setTimeout(resolve, 10000));
 
     const response: number | null | undefined = await Promise.race([
       this.actionCallBack(this.roomNumber, player),
@@ -106,7 +100,7 @@ class GameServer {
     // Implement logic to request a player to play a Nope card
     // Return true if the player chooses to play a Nope card, false otherwise
 
-    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+    const timeout = new Promise((resolve) => setTimeout(resolve, 10000));
 
     const response: boolean | null | undefined = await Promise.race([
       this.playNopeCallBack(this.roomNumber, player.name),

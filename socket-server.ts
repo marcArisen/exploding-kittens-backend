@@ -121,14 +121,14 @@ class SocketServer {
       timeoutId = setTimeout(() => {
         this.io.removeListener(eventName, onEvent);
         resolve(null);
-      }, 4000);
+      }, 9900);
 
       this.io.on(eventName, onEvent);
     });
   }
 
   actionCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.waitForClientAction(roomID, player, 'action', 4900);
+    return this.socketList.get(player)!.waitForClientAction(roomID, player, 'action', 9900);
   }
 
   playNopeCallBack(roomID: string, player: string) {
@@ -137,7 +137,7 @@ class SocketServer {
 
   requestCardCallBack(roomID: string, player: string) {
     console.log(`${player} picking the card`);
-    return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 4900);
+    return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 9900);
   }
 
   activateEventListener() {

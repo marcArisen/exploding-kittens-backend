@@ -32,7 +32,7 @@ class SocketHandler {
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
         resolve(null);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+      }, timeout || 10000); // Set the default timeout to 10000ms (10 seconds)
 
       this.socket.on(eventName, onEvent);
     });
@@ -56,7 +56,7 @@ class SocketHandler {
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
         resolve(false);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+      }, timeout || 10000); // Set the default timeout to 5000ms (5 seconds)
 
       this.socket.on(eventName, onEvent);
     });
@@ -85,7 +85,7 @@ class SocketHandler {
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
         resolve(null);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+      }, timeout || 10000); // Set the default timeout to 5000ms (5 seconds)
 
       this.socket.on(eventName, onEvent);
     });
