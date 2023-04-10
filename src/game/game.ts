@@ -136,6 +136,7 @@ class Game {
     player: Player,
     cardIndex: number,
     requestPlayNopeCallback: (player: Player) => Promise<boolean>,
+    updateStateCallback: Function
   ) {
     if (cardIndex === -1) {
       return null;
@@ -149,6 +150,9 @@ class Game {
       this.discardPile.push(playcard);
       player.removeCardByIndex(cardIndex);
     }
+
+    updateStateCallback(); // update state after the card is discarded
+
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
     console.log(nopeCardPlayed);
@@ -209,6 +213,7 @@ class Game {
       }
       const nopeCardIndex = player.hasNopeCard();
       const response = await Promise.race([requestPlayNope(player), timeout]);
+      console.log(`response for nope  from player ${player.name} is : ${response}`);
         if (response && nopeCardIndex >= 0) {
           console.log(`${player.name} plays nope card`);
           nopePlayed = true;

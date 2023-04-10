@@ -63,12 +63,10 @@ class GameServer {
           currentPlayer,
           cardIndex,
           this.requestPlayNope.bind(this),
+          this.updateState.bind(this),
         );
       }
-      // if (effect === true) {
-      //   this.game.nextTurn();
-      // }
-      // effect = false; // reset the effect
+
       if (effect == false || cardIndex === -1 || cardIndex === null) {
         this.game.drawCards();
         this.game.nextTurn();
@@ -107,7 +105,7 @@ class GameServer {
       this.playNopeCallBack(this.roomNumber, player.name),
       timeout,
     ]);
-    if (response) {
+    if (response != null) {
       return response;
     }
     return false;
