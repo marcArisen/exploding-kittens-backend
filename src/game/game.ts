@@ -307,10 +307,8 @@ class Game {
    * Use Attack card effect.
    */
   useAttackCard() {
-    if (this.attackStack > 0){
-      this.gameLogCallback(`attack stack is ${this.attackStack} draws`);
-    }
     this.attackStack++;
+    this.gameLogCallback(`attack stack is ${this.attackStack} draws`);
     this.nextTurn();
   }
 
