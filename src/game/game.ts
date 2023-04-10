@@ -26,7 +26,7 @@ class Game {
    */
   constructor(playerNames: any, gameLogCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
-    this.allPlayers = playerNames.map((name: string) => new Player(name));
+    this.allPlayers = this.players.slice();
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
