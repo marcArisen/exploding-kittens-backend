@@ -17,7 +17,7 @@ class GameServer {
     playNopeCallBack: (roomID: string, player: string) => Promise<any>,
     requestCardCallBack: (roomID: string, player: string) => Promise<any>,
   ) {
-    this.game = new Game(playerNames, this.updateGamelog.bind(this));
+    this.game = new Game(playerNames, this.updateGamelog.bind(this), this.notifySeeFuture.bind(this), this.notifyGetRandomCard.bind(this));
     this.io = io;
     this.actionCallBack = actionCallBack;
     this.playNopeCallBack = playNopeCallBack;
@@ -42,6 +42,14 @@ class GameServer {
 
   notifyNope() {
     this.io.to(this.roomNumber).emit('after nope', true);
+  }
+
+  notifySeeFuture(socketName: string, cards: any) {
+    this.io.to(this.roomNumber).to(socketName).emit('see future', cards);
+  }
+
+  notifyGetRandomCard(socketName: string) {
+    this.io.to(this.roomNumber).to(socketName).emit('random card', true);
   }
 
   /**

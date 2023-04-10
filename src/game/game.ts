@@ -17,15 +17,17 @@ class Game {
   diedPlayer: Player[];
   attackStack: number;
   lastPlayedCard: any;
-  gameLogCallback: any;
+  gameLogCallback: Function;
   allPlayers: Player[];
   lastNopePlayer: Player;
+  seeFureCallback: Function;
+  randomCardCallback: Function;
 
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
    */
-  constructor(playerNames: any, gameLogCallback: any) {
+  constructor(playerNames: any, gameLogCallback: any, seeFureCallback: any, randomCardCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
     this.allPlayers = this.players.slice();
     this.deck = new Deck();
@@ -39,6 +41,8 @@ class Game {
     this.lastPlayedCard = null;
     this.gameLogCallback = gameLogCallback;
     this.lastNopePlayer = this.currentPlayer;
+    this.seeFureCallback = seeFureCallback;
+    this.randomCardCallback = randomCardCallback;
   }
 
   // TODO: dont forget this part, currently exposing all cards
@@ -288,6 +292,8 @@ class Game {
    * Use See the future card effect.
    */
   useSeeTheFutureCard() {
+    // emit.to(player).("see future", this.deck.peek(3))
+    this.seeFureCallback(this.currentPlayer.name, this.deck.peek(3));
     return this.deck.peek(3);
   }
 
@@ -322,6 +328,7 @@ class Game {
     const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
     this.gameLogCallback(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
+    this.randomCardCallback(this.currentPlayer.name);
   }
 
   useNumberCard(player: Player, cardIndices: number[]) {
@@ -343,6 +350,7 @@ class Game {
         // Use the pair effect (steal a card from the target player)
         this.gameLogCallback(`player ${player.name} use pair effect to ${targetPlayer.name}`);
         this.useFavorCard(targetPlayer);
+        this.randomCardCallback(player.name);
       }
     }
   }
