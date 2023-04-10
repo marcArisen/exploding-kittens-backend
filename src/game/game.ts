@@ -145,17 +145,21 @@ class Game {
     console.log(`${this.currentPlayer.name} plays ${playcard.getName()}`);
     this.lastPlayedCard = playcard;
 
-    //If player play Number Card Nope cannot be played.
-    if (playcard instanceof card.NumberCard) {
-      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
-      return;
+    if (!(playcard instanceof card.NumberCard)){
+      this.discardPile.push(playcard);
+      player.removeCardByIndex(cardIndex);
     }
-    this.discardPile.push(playcard);
-    player.removeCardByIndex(cardIndex);
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
     console.log(nopeCardPlayed);
     if (nopeCardPlayed) {
+      this.gameLogCallback(`unkown player plays nope card`);
+      return;
+    }
+
+    //If player play Number Card
+    if (playcard instanceof card.NumberCard) {
+      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
       return;
     }
     //Activate card effect
@@ -203,12 +207,9 @@ class Game {
       if (player === lastNopePlayer) {
         continue;
       }
-
       const nopeCardIndex = player.hasNopeCard();
-      if (nopeCardIndex >= 0) {
-        console.log(`${player.name} got the nope card`);
-        const response = await Promise.race([requestPlayNope(player), timeout]);
-        if (response) {
+      const response = await Promise.race([requestPlayNope(player), timeout]);
+        if (response && nopeCardIndex >= 0) {
           console.log(`${player.name} plays nope card`);
           nopePlayed = true;
           nopeCount++;
@@ -216,7 +217,20 @@ class Game {
           this.playNopeCard(player, nopeCardIndex);
           break;
         }
-      }
+
+      // const nopeCardIndex = player.hasNopeCard();
+      // if (nopeCardIndex >= 0) {
+
+      //   const response = await Promise.race([requestPlayNope(player), timeout]);
+      //   if (response) {
+      //     console.log(`${player.name} plays nope card`);
+      //     nopePlayed = true;
+      //     nopeCount++;
+      //     lastNopePlayer = player;
+      //     this.playNopeCard(player, nopeCardIndex);
+      //     break;
+      //   }
+      // }
     }
 
     if (nopePlayed) {
