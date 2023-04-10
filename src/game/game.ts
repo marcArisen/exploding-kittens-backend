@@ -317,8 +317,8 @@ class Game {
       if (card1 instanceof card.NumberCard && card2 instanceof card.NumberCard) {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
+        player.removeCardByIndex(cardIndices[1]);
         player.removeCardByIndex(cardIndices[0]);
-        player.removeCardByIndex(cardIndices[1] - 1); // TODO: Fix this hardcode
 
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
