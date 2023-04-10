@@ -44,6 +44,8 @@ class SocketServer {
     this.gameRoom.set(socket.roomID, filteredPlayers);
     this.io.to(socket.roomID).emit('join room', this.gameRoom.get(socket.roomID));
     console.log(`${socket.userName} disconnected to the server`);
+    this.socketList.delete(socket.userName);
+    
   }
 
   handleJoinRoom(socket: any, roomID: string) {

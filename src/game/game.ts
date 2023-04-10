@@ -155,7 +155,6 @@ class Game {
 
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
-    console.log(nopeCardPlayed);
     if (nopeCardPlayed) {
       this.gameLogCallback(`unkown player plays nope card`);
       return;
