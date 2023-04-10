@@ -19,6 +19,7 @@ class Game {
   lastPlayedCard: any;
   gameLogCallback: any;
   allPlayers: Player[];
+  lastNopePlayer: Player;
 
   /**
    * Create a new game with the specified players.
@@ -37,6 +38,7 @@ class Game {
     this.attackStack = 0;
     this.lastPlayedCard = null;
     this.gameLogCallback = gameLogCallback;
+    this.lastNopePlayer = this.currentPlayer;
   }
 
   // TODO: dont forget this part, currently exposing all cards
@@ -53,6 +55,7 @@ class Game {
       attackStack: this.attackStack,
       lastPlayedCard: this.lastPlayedCard,
       allPlayers: this.allPlayers,
+      lastNopePlayer: this.lastNopePlayer
     };
   }
 
@@ -136,6 +139,7 @@ class Game {
     updateStateCallback: Function,
     notifyNopeCallback: Function,
   ) {
+    this.lastNopePlayer = this.currentPlayer;
     if (cardIndex === -1) {
       return null;
     }
@@ -199,7 +203,7 @@ class Game {
     requestPlayNope: (player: Player) => Promise<boolean>,
     notifyNopeCallback: Function,
     nopeCount = 0,
-    lastNopePlayer: Player = this.currentPlayer,
+    lastNopePlayer = this.lastNopePlayer,
   ): Promise<boolean> {
     let nopePlayed = false;
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
@@ -216,7 +220,7 @@ class Game {
           console.log(`${player.name} plays nope card`);
           nopePlayed = true;
           nopeCount++;
-          lastNopePlayer = player;
+          this.lastNopePlayer = player;
           this.playNopeCard(player, nopeCardIndex);
           break;
         }
@@ -238,7 +242,7 @@ class Game {
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
-      const nopeCanceled = await this.waitForNope(requestPlayNope, notifyNopeCallback, nopeCount, lastNopePlayer);
+      const nopeCanceled = await this.waitForNope(requestPlayNope, notifyNopeCallback, nopeCount, this.lastNopePlayer);
       // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
       return nopeCanceled;
     } else {
