@@ -40,8 +40,8 @@ class GameServer {
     this.io.to(this.roomNumber).emit('game log', text);
   }
 
-  notifyNope() {
-    this.io.to(this.roomNumber).emit('after nope', true);
+  notifyNope(playerName: any) {
+    this.io.to(this.roomNumber).emit('after nope', [true, playerName]);
   }
 
   notifySeeFuture(socketName: string, cards: any) {

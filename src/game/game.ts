@@ -211,7 +211,7 @@ class Game {
     delay = 5000
   ): Promise<boolean> {
     let nopePlayed = false;
-    notifyNopeCallback();
+    notifyNopeCallback(this.lastNopePlayer);
 
     const hasNope: Array<Player> = [];
     const nopeIndex: Map<string, number> = new Map();
@@ -237,6 +237,7 @@ class Game {
           nopeCount++;
           this.lastNopePlayer = trackPlayers.get(response)!;
           this.playNopeCard(trackPlayers.get(response)! , nopeIndex.get(response)!);
+          notifyNopeCallback(this.lastNopePlayer);
         }
 
     if (nopePlayed) {
@@ -260,7 +261,6 @@ class Game {
     this.discardPile.push(nopeCard);
     player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = nopeCard;
-    this.lastNopePlayer = player;
   }
 
   /**
