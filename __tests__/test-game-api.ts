@@ -12,7 +12,7 @@ describe('Game', () => {
     game = new Game(playerNames, () => {},() => {},() => {}, () => {});
   });
 
-  it('should create a new game with the specified players', () => {
+  test('should create a new game with the specified players', () => {
     const players = game.getPlayers();
     expect(players).toHaveLength(4);
     expect(players[0].name).toBe('Alice');
@@ -27,7 +27,7 @@ describe('Game', () => {
     });
   });
 
-  it('should add Exploding Kitten card to the deck and shuffle', () => {
+  test('should add Exploding Kitten card to the deck and shuffle', () => {
     game.addExplodingKittenCard();
     expect(game.deck.cards.filter((c) => c instanceof card.ExplodingKittenCard)).toHaveLength(4);
   });
