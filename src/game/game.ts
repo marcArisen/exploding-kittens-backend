@@ -22,12 +22,13 @@ class Game {
   lastNopePlayer: Player;
   seeFureCallback: Function;
   randomCardCallback: Function;
+  timerCallback: Function;
 
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
    */
-  constructor(playerNames: any, gameLogCallback: any, seeFureCallback: any, randomCardCallback: any) {
+  constructor(playerNames: any, gameLogCallback: any, seeFureCallback: any, randomCardCallback: any, timerCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
     this.allPlayers = this.players.slice();
     this.deck = new Deck();
@@ -43,6 +44,7 @@ class Game {
     this.lastNopePlayer = this.currentPlayer;
     this.seeFureCallback = seeFureCallback;
     this.randomCardCallback = randomCardCallback;
+    this.timerCallback = timerCallback;
   }
 
   // TODO: dont forget this part, currently exposing all cards
@@ -222,7 +224,7 @@ class Game {
         nopeIndex.set(player.name, index);
       }
     }
-      
+    this.timerCallback(5);
       const response: any= await Promise.race([requestPlayNope(hasNope[0]), requestPlayNope(hasNope[1]), requestPlayNope(hasNope[2]), new Promise((resolve) => setTimeout(resolve, 5000))]);
         if (response) {
           this.gameLogCallback(`${response} plays nope card`);

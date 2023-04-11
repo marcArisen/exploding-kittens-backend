@@ -17,7 +17,7 @@ class GameServer {
     playNopeCallBack: (roomID: string, player: string) => Promise<any>,
     requestCardCallBack: (roomID: string, player: string) => Promise<any>,
   ) {
-    this.game = new Game(playerNames, this.updateGamelog.bind(this), this.notifySeeFuture.bind(this), this.notifyGetRandomCard.bind(this));
+    this.game = new Game(playerNames, this.updateGamelog.bind(this), this.notifySeeFuture.bind(this), this.notifyGetRandomCard.bind(this), this.notifyTimer.bind(this));
     this.io = io;
     this.actionCallBack = actionCallBack;
     this.playNopeCallBack = playNopeCallBack;
@@ -52,6 +52,10 @@ class GameServer {
     this.io.to(socketName).emit('random card', true);
   }
 
+  notifyTimer(seconds: number) {
+    this.io.to(this.roomNumber).emit('timer', seconds);
+  }
+
   /**
    * Starts the game loop and manages the game state.
    */
@@ -59,6 +63,7 @@ class GameServer {
     var effect; // card effect
     while (this.game.diedPlayer.length < 3) {
       const currentPlayer = this.game.currentPlayer;
+      this.notifyTimer(10); // update the timer
       this.updateState(); // update the state through SocketIO
       this.updateGamelog(`It's ${currentPlayer.name}'s turn.`);
       // Give player 5 seconds to play an action card
