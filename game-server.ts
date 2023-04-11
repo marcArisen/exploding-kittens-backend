@@ -102,20 +102,20 @@ class GameServer {
     return null;
   }
 
-  async requestPlayNope(player: Player): Promise<boolean> {
+  async requestPlayNope(player: Player): Promise<string | null> {
     // Implement logic to request a player to play a Nope card
     // Return true if the player chooses to play a Nope card, false otherwise
 
-    const timeout = new Promise((resolve) => setTimeout(resolve, 10000));
+    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
 
-    const response: boolean | null | undefined = await Promise.race([
+    const response: string | null | undefined = await Promise.race([
       this.playNopeCallBack(this.roomNumber, player.name),
       timeout,
     ]);
     if (response != null) {
       return response;
     }
-    return false;
+    return null;
   }
 }
 

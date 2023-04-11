@@ -139,7 +139,7 @@ class Game {
   async playCard(
     player: Player,
     cardIndex: number,
-    requestPlayNopeCallback: (player: Player) => Promise<boolean>,
+    requestPlayNopeCallback: (player: Player) => Promise<string| null>,
     updateStateCallback: Function,
     notifyNopeCallback: Function,
   ) {
@@ -160,7 +160,7 @@ class Game {
     // Check if the next player wants to play a Nope card
     const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
     if (nopeCardPlayed) {
-      this.gameLogCallback(`unkown player plays nope card`);
+      this.gameLogCallback(`someone plays nope card`);
       return;
     }
 
@@ -178,7 +178,6 @@ class Game {
     //See the future Card effect
     else if (playcard instanceof card.SeeTheFutureCard) {
       this.useSeeTheFutureCard();
-      // console.log(this.useSeeTheFutureCard());
     }
     //Attack Card effect
     else if (playcard instanceof card.AttackCard) {
@@ -203,45 +202,35 @@ class Game {
    * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
    */
   async waitForNope(
-    requestPlayNope: (player: Player) => Promise<boolean>,
+    requestPlayNope: (player: Player) => Promise<string | null>,
     notifyNopeCallback: Function,
     nopeCount = 0,
     lastNopePlayer = this.lastNopePlayer,
   ): Promise<boolean> {
     let nopePlayed = false;
-    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
     notifyNopeCallback();
+
+    const hasNope: Array<Player> = [];
+    const nopeIndex: Map<string, number> = new Map();
+    const trackPlayers: Map<string, Player> = new Map();
     
     for (const player of this.players) {
-      if (player === lastNopePlayer) {
-        continue;
+      const index = player.hasNopeCard();
+      trackPlayers.set(player.name, player);
+      if (player.name !== lastNopePlayer.name) {
+        hasNope.push(player);
+        nopeIndex.set(player.name, index);
       }
-      const nopeCardIndex = player.hasNopeCard();
-      const response = await Promise.race([requestPlayNope(player), timeout]);
-      console.log(`response for nope  from player ${player.name} is : ${response}`);
-        if (response && nopeCardIndex >= 0) {
-          console.log(`${player.name} plays nope card`);
+    }
+      
+      const response: any= await Promise.race([requestPlayNope(hasNope[0]), requestPlayNope(hasNope[1]), requestPlayNope(hasNope[2]), new Promise((resolve) => setTimeout(resolve, 5000))]);
+        if (response) {
+          this.gameLogCallback(`${response} plays nope card`);
           nopePlayed = true;
           nopeCount++;
-          this.lastNopePlayer = player;
-          this.playNopeCard(player, nopeCardIndex);
-          break;
+          this.lastNopePlayer = trackPlayers.get(response)!;
+          this.playNopeCard(trackPlayers.get(response)! , nopeIndex.get(response)!);
         }
-
-      // const nopeCardIndex = player.hasNopeCard();
-      // if (nopeCardIndex >= 0) {
-
-      //   const response = await Promise.race([requestPlayNope(player), timeout]);
-      //   if (response) {
-      //     console.log(`${player.name} plays nope card`);
-      //     nopePlayed = true;
-      //     nopeCount++;
-      //     lastNopePlayer = player;
-      //     this.playNopeCard(player, nopeCardIndex);
-      //     break;
-      //   }
-      // }
-    }
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card

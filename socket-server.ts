@@ -143,7 +143,6 @@ class SocketServer {
   }
 
   requestCardCallBack(roomID: string, player: string) {
-    console.log(`${player} picking the card`);
     return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 9900);
   }
 
