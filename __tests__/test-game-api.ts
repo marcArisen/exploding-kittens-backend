@@ -177,12 +177,12 @@ describe('Game', () => {
     game.currentPlayer = game.players[0];
     const nopeCard = new card.NopeCard();
     game.currentPlayer.addCardToHand(nopeCard);
-    const requestPlayNopeCallback = async (player: Player) => 'Bob';
+    const requestPlayNopeCallback = async (player: Player): Promise<string | null> => 'Bob';
     const notifyNopeCallback = () => {};
     const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
     expect(nopeResult).toBe(true);
   });
-
+  
   it('should return the current game state', () => {
     // Set up the game state
     const currentPlayer = game.currentPlayer;
