@@ -9,7 +9,7 @@ describe('Game', () => {
 
   beforeEach(() => {
     playerNames = ['Alice', 'Bob', 'Charlie', 'David'];
-    game = new Game(playerNames, () => {});
+    game = new Game(playerNames, () => {},() => {},() => {}, () => {});
   });
 
   it('should create a new game with the specified players', () => {
@@ -133,9 +133,11 @@ describe('Game', () => {
     const attackCard = new card.AttackCard();
     game.currentPlayer.addCardToHand(attackCard);
     const cardIndex = game.currentPlayer.getHandLength() - 1;
-    const requestPlayNopeCallback = async (player: Player) => false;
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-    await game.playCard(game.currentPlayer, cardIndex, requestPlayNopeCallback);
+    await game.playCard(game.currentPlayer, cardIndex, requestPlayNopeCallback, updateStateCallback, notifyNopeCallback);
 
     expect(game.currentPlayer.getHandLength()).toBe(cardIndex);
     expect(game.attackStack).toBe(1);
@@ -144,9 +146,11 @@ describe('Game', () => {
   it('player doesnt play any card', async () => {
     const attackCard = new card.AttackCard();
     game.currentPlayer.addCardToHand(attackCard);
-    const requestPlayNopeCallback = async (player: Player) => false;
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-    const playedCard = await game.playCard(game.currentPlayer, -1, requestPlayNopeCallback);
+    const playedCard = await game.playCard(game.currentPlayer, -1, requestPlayNopeCallback, updateStateCallback, notifyNopeCallback);
 
     expect(playedCard).toBe(null);
   });
@@ -163,18 +167,50 @@ describe('Game', () => {
   });
 
   it('should wait for nope and return false if nope is not played', async () => {
-    const requestPlayNopeCallback = async (player: Player) => false;
-    const nopeResult = await game.waitForNope(requestPlayNopeCallback);
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const notifyNopeCallback = () => {};
+    const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
     expect(nopeResult).toBe(false);
   });
 
-  it('should wait for nope and return true if nope is played', async () => {
-    const nopeCard = new card.NopeCard();
-    game.currentPlayer.addCardToHand(nopeCard);
-    const requestPlayNopeCallback = async (player: Player) => true;
-    const nopeResult = await game.waitForNope(requestPlayNopeCallback, 1);
-    expect(nopeResult).toBe(true);
-  });
+  // it('should wait for nope and return true if nope is played', async () => {
+  //   game.currentPlayer = game.players[0];
+  //   const nopeCard = new card.NopeCard();
+  //   game.currentPlayer.addCardToHand(nopeCard);
+  //   const requestPlayNopeCallback: any = (player: Player) => new Promise((resolve) => setTimeout(() => resolve('bob'), 100));
+  //   const notifyNopeCallback = () => {};
+  //   const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
+  //   expect(nopeResult).toBe(true);
+  // });
+  it('forces a specific player to play a Nope card', async () => {
+    // Add a Nope card to targetPlayer's hand
+    game.currentPlayer = game.players[0];
+    const targetPlayer = game.players[1];
+    targetPlayer.addCardToHand(card.NopeCard);
+  
+    // Force targetPlayer to play a Nope card
+    const forcedPlayerName = targetPlayer.name;
+    const testDelay = 100;
+    const requestPlayNopeMock = async (player: Player) => {
+    return new Promise<string | null>((resolve) => {
+      setTimeout(() => {
+        if (player.name === forcedPlayerName) {
+          resolve(forcedPlayerName);
+        } else {
+          resolve(null);
+        }
+      }, testDelay/10);
+    });
+  };
+
+  const notifyNopeCallback = () => {};
+  const nopePlayed = await game.waitForNope(requestPlayNopeMock, notifyNopeCallback, 0, game.lastNopePlayer, testDelay);
+
+  expect(nopePlayed).toBe(true);
+});
+  
+  
+  
 
   it('should return the current game state', () => {
     // Set up the game state
@@ -185,8 +221,12 @@ describe('Game', () => {
     const numberOfPlayers = game.players.length;
     const turn = game.turn;
     currentPlayer.addCardToHand(lastPlayedCard);
-    game.playCard(currentPlayer, currentPlayer.getHandLength() - 1, async () => false);
-
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+    const lastNopePlayer = game.lastNopePlayer;
+    game.playCard(currentPlayer, currentPlayer.getHandLength() - 1, requestPlayNopeCallback, updateStateCallback, notifyNopeCallback);
+    
     //Call the getCurrentState method
     const currentState = game.getCurrentState();
 
@@ -202,6 +242,7 @@ describe('Game', () => {
     expect(currentState.attackStack).toBe(game.attackStack);
     expect(currentState.lastPlayedCard).toBe(lastPlayedCard);
     expect(currentState.allPlayers).toBe(allPlayers);
+    expect(currentState.lastNopePlayer).toBe(lastNopePlayer);
   });
 
   it('should use number card and trigger its effect', () => {
@@ -239,9 +280,14 @@ describe('Game', () => {
   it('Play a NumberCard', async () => {
     game.currentPlayer.addCardToHand(new card.NumberCard('Beard Cat'));
     game.currentPlayer.addCardToHand(new card.NumberCard('Beard Cat'));
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,
+      requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NumberCard);
@@ -251,8 +297,12 @@ describe('Game', () => {
 
   it('Play a ShuffleCard', async () => {
     game.currentPlayer.addCardToHand(new card.ShuffleCard());
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.ShuffleCard);
@@ -262,9 +312,13 @@ describe('Game', () => {
 
   it('Play a NopeCard', async () => {
     game.currentPlayer.addCardToHand(new card.NopeCard());
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
@@ -274,9 +328,13 @@ describe('Game', () => {
 
   it('Play a See The Future Card', async () => {
     game.currentPlayer.addCardToHand(new card.SeeTheFutureCard());
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.SeeTheFutureCard);
@@ -287,8 +345,13 @@ describe('Game', () => {
   it('Play a SkipCard', async () => {
     game.currentPlayer.addCardToHand(new card.SkipCard());
 
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.SkipCard);
@@ -299,8 +362,13 @@ describe('Game', () => {
   it('Play a FavorCard', async () => {
     game.currentPlayer.addCardToHand(new card.FavorCard());
 
-    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, () =>
-      Promise.resolve(false),
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1,requestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.FavorCard);
@@ -314,14 +382,25 @@ describe('Game', () => {
     console.log('Game state:', game.getCurrentState());
     // Mock the requestPlayNopeCallback to return true only for the nopePlayer
     const mockRequestPlayNopeCallback = async (player: Player) => {
-      return player !== game.currentPlayer;
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 1); // Set the delay to half of the testDelay
+      });
     };
 
     // Play the AttackCard
-    await game.playCard(
-      game.currentPlayer,
-      game.currentPlayer.hand.length - 1,
-      mockRequestPlayNopeCallback,
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     // Check if the last card in the discardPile is the Nope card
@@ -340,15 +419,31 @@ describe('Game', () => {
     nopePlayer.addCardToHand(new card.NopeCard());
     console.log('Game state:', game.getCurrentState());
     // Mock the requestPlayNopeCallback to return true only for the nopePlayer
+    // const mockRequestPlayNopeCallback = async (player: Player) => {
+    //   return player !== game.currentPlayer;
+    // };
+
+    // Play the AttackCard
     const mockRequestPlayNopeCallback = async (player: Player) => {
-      return player !== game.currentPlayer;
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 10); // Set the delay to half of the testDelay
+      });
     };
 
     // Play the AttackCard
-    await game.playCard(
-      game.currentPlayer,
-      game.currentPlayer.hand.length - 1,
-      mockRequestPlayNopeCallback,
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
+
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
     );
 
     // Check if the last card in the discardPile is the Nope card
