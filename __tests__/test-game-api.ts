@@ -195,8 +195,9 @@ describe('Game', () => {
     const requestPlayNopeCallback = async (player: Player) => null;
     const updateStateCallback = () => {};
     const notifyNopeCallback = () => {};
+    const lastNopePlayer = game.lastNopePlayer;
     game.playCard(currentPlayer, currentPlayer.getHandLength() - 1, requestPlayNopeCallback, updateStateCallback, notifyNopeCallback);
-
+    
     //Call the getCurrentState method
     const currentState = game.getCurrentState();
 
@@ -212,6 +213,7 @@ describe('Game', () => {
     expect(currentState.attackStack).toBe(game.attackStack);
     expect(currentState.lastPlayedCard).toBe(lastPlayedCard);
     expect(currentState.allPlayers).toBe(allPlayers);
+    expect(currentState.lastNopePlayer).toBe(lastNopePlayer);
   });
 
   it('should use number card and trigger its effect', () => {
