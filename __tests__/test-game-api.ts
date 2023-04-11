@@ -173,16 +173,45 @@ describe('Game', () => {
     expect(nopeResult).toBe(false);
   });
 
-  it('should wait for nope and return true if nope is played', async () => {
+  // it('should wait for nope and return true if nope is played', async () => {
+  //   game.currentPlayer = game.players[0];
+  //   const nopeCard = new card.NopeCard();
+  //   game.currentPlayer.addCardToHand(nopeCard);
+  //   const requestPlayNopeCallback: any = (player: Player) => new Promise((resolve) => setTimeout(() => resolve('bob'), 100));
+  //   const notifyNopeCallback = () => {};
+  //   const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
+  //   expect(nopeResult).toBe(true);
+  // });
+  it('forces a specific player to play a Nope card', async () => {
+    // Add a Nope card to targetPlayer's hand
     game.currentPlayer = game.players[0];
-    const nopeCard = new card.NopeCard();
-    game.currentPlayer.addCardToHand(nopeCard);
-    const requestPlayNopeCallback = async (player: Player): Promise<string | null> => 'Bob';
-    const notifyNopeCallback = () => {};
-    const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
-    expect(nopeResult).toBe(true);
-  });
+    const targetPlayer = game.players[1];
+    targetPlayer.addCardToHand(card.NopeCard);
   
+    // Force targetPlayer to play a Nope card
+    const forcedPlayerName = targetPlayer.name;
+    const testDelay = 100;
+    const requestPlayNopeMock = async (player: Player) => {
+    return new Promise<string | null>((resolve) => {
+      setTimeout(() => {
+        if (player.name === forcedPlayerName) {
+          resolve(forcedPlayerName);
+        } else {
+          resolve(null);
+        }
+      }, testDelay/10);
+    });
+  };
+
+  const notifyNopeCallback = () => {};
+  const nopePlayed = await game.waitForNope(requestPlayNopeMock, notifyNopeCallback, 0, game.lastNopePlayer, testDelay);
+
+  expect(nopePlayed).toBe(true);
+});
+  
+  
+  
+
   it('should return the current game state', () => {
     // Set up the game state
     const currentPlayer = game.currentPlayer;
@@ -353,12 +382,16 @@ describe('Game', () => {
     console.log('Game state:', game.getCurrentState());
     // Mock the requestPlayNopeCallback to return true only for the nopePlayer
     const mockRequestPlayNopeCallback = async (player: Player) => {
-      if (player.name !== game.currentPlayer.name) {
-        return player.name;
-      } else {
-        return null;
-      }
-    };    
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 1); // Set the delay to half of the testDelay
+      });
+    };
 
     // Play the AttackCard
     const requestPlayNopeCallback = async (player: Player) => null;
@@ -392,12 +425,16 @@ describe('Game', () => {
 
     // Play the AttackCard
     const mockRequestPlayNopeCallback = async (player: Player) => {
-      if (player.name !== game.currentPlayer.name) {
-        return player.name;
-      } else {
-        return null;
-      }
-    };    
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 10); // Set the delay to half of the testDelay
+      });
+    };
 
     // Play the AttackCard
     const requestPlayNopeCallback = async (player: Player) => null;
