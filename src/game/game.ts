@@ -260,6 +260,7 @@ class Game {
     this.discardPile.push(nopeCard);
     player.removeCardByIndex(cardIndex);
     this.lastPlayedCard = nopeCard;
+    this.lastNopePlayer = player;
   }
 
   /**
