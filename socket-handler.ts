@@ -32,7 +32,7 @@ class SocketHandler {
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
         resolve(null);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+      }, timeout || 10000); // Set the default timeout to 10000ms (10 seconds)
 
       this.socket.on(eventName, onEvent);
     });
@@ -42,21 +42,21 @@ class SocketHandler {
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout;
 
-      const onEvent = () => {
+      const onEvent = (data: any) => {
         var room = this.socket.roomID;
         var userName = this.socket.userName;
         console.log(`${this.socket.userName} play nope card!`);
         if (room === roomID && userName === name) {
           clearTimeout(timeoutId);
           this.socket.removeListener(eventName, onEvent);
-          resolve(true);
+          resolve(data);
         }
       };
 
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
-        resolve(false);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+        resolve(null);
+      }, timeout); // Set the default timeout to 5000ms (5 seconds)
 
       this.socket.on(eventName, onEvent);
     });
@@ -85,7 +85,7 @@ class SocketHandler {
       timeoutId = setTimeout(() => {
         this.socket.removeListener(eventName, onEvent);
         resolve(null);
-      }, timeout || 5000); // Set the default timeout to 5000ms (5 seconds)
+      }, timeout || 10000); // Set the default timeout to 5000ms (5 seconds)
 
       this.socket.on(eventName, onEvent);
     });

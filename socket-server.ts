@@ -44,12 +44,19 @@ class SocketServer {
     this.gameRoom.set(socket.roomID, filteredPlayers);
     this.io.to(socket.roomID).emit('join room', this.gameRoom.get(socket.roomID));
     console.log(`${socket.userName} disconnected to the server`);
+    // this.socketList.delete(socket.userName);
+    const playerRoom = this.gameRoom.get(socket.roomID);
+    if (!playerRoom || playerRoom.length <= 0){
+      this.gameRoom.delete(socket.roomID);
+      this.gameInstances.delete(socket.roomID);
+    }
+    
   }
 
   handleJoinRoom(socket: any, roomID: string) {
     if (this.gameRoom.has(roomID)) {
       const currentGameRoom = this.gameRoom.get(roomID)!;
-      if (currentGameRoom.length < 4) {
+      if (currentGameRoom && currentGameRoom.length < 4) {
         currentGameRoom.push(socket.userName);
         socket.join(roomID);
         this.io.to(roomID).emit('join room', this.gameRoom.get(roomID));
@@ -65,14 +72,13 @@ class SocketServer {
     }
   }
 
-  handleMessage(socket: any, { message, roomID }: any, callback: Function) {
-    console.log('message: ' + message + ' in ' + roomID);
+  handleMessage(socket: any, message: string) {
     const outgoingMessage = {
       name: socket.userName,
       message,
     };
-    this.io.to(roomID).emit('message', outgoingMessage);
-    callback({ status: 'ok' });
+    console.log(outgoingMessage);
+    this.io.to(socket.roomID).emit('message', outgoingMessage);
   }
 
   handleGameLoop(socket: any) {
@@ -122,23 +128,22 @@ class SocketServer {
       timeoutId = setTimeout(() => {
         this.io.removeListener(eventName, onEvent);
         resolve(null);
-      }, 4000);
+      }, 9900);
 
       this.io.on(eventName, onEvent);
     });
   }
 
   actionCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.waitForClientAction(roomID, player, 'action', 4900);
+    return this.socketList.get(player)!.waitForClientAction(roomID, player, 'action', 9900);
   }
 
   playNopeCallBack(roomID: string, player: string) {
-    return this.socketList.get(player)!.playNopeCallBack(roomID, player, 'action', 4900);
+    return this.socketList.get(player)!.playNopeCallBack(roomID, player, 'nope', 4900);
   }
 
   requestCardCallBack(roomID: string, player: string) {
-    console.log(`${player} picking the card`);
-    return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 4900);
+    return this.socketList.get(player)!.requestCardCallBack(roomID, player, 'request', 9900);
   }
 
   activateEventListener() {
@@ -153,8 +158,8 @@ class SocketServer {
         this.handleJoinRoom(socket, roomID);
       });
 
-      socket.on('message', (payload: any, callback: Function) => {
-        this.handleMessage(socket, payload, callback);
+      socket.on('message', (msg: any) => {
+        this.handleMessage(socket, msg);
       });
 
       socket.on('game loop', () => {

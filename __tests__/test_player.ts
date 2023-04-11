@@ -80,4 +80,17 @@ describe('Player system', () => {
     expect(me.getHandLength()).toEqual(initialHandLength - 1);
     expect(me.getHand().includes(randomCard)).toBeFalsy();
   });
+
+  test('Get hand string', () => {
+    const player: Player = new Player('TestPlayer');
+    player.addCardToHand(new NumberCard('Watermelon Cat'));
+    player.addCardToHand(new ShuffleCard());
+    player.addCardToHand(new NopeCard());
+
+    const handString = player.getHandString();
+    expect(handString.length).toEqual(3);
+    expect(handString).toContain('Watermelon Cat');
+    expect(handString).toContain('Shuffle');
+    expect(handString).toContain('Nope');
+  });
 });

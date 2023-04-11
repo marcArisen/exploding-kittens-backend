@@ -17,13 +17,20 @@ class Game {
   diedPlayer: Player[];
   attackStack: number;
   lastPlayedCard: any;
+  gameLogCallback: Function;
+  allPlayers: Player[];
+  lastNopePlayer: Player;
+  seeFureCallback: Function;
+  randomCardCallback: Function;
+  timerCallback: Function;
 
   /**
    * Create a new game with the specified players.
    * @param {string[]} playerNames - The names of the players.
    */
-  constructor(playerNames: any) {
+  constructor(playerNames: any, gameLogCallback: any, seeFureCallback: any, randomCardCallback: any, timerCallback: any) {
     this.players = playerNames.map((name: string) => new Player(name));
+    this.allPlayers = this.players.slice();
     this.deck = new Deck();
     this.discardPile = [];
     this.turn = 0;
@@ -33,6 +40,11 @@ class Game {
     this.diedPlayer = [];
     this.attackStack = 0;
     this.lastPlayedCard = null;
+    this.gameLogCallback = gameLogCallback;
+    this.lastNopePlayer = this.currentPlayer;
+    this.seeFureCallback = seeFureCallback;
+    this.randomCardCallback = randomCardCallback;
+    this.timerCallback = timerCallback;
   }
 
   // TODO: dont forget this part, currently exposing all cards
@@ -48,6 +60,8 @@ class Game {
       diedPlayer: this.diedPlayer,
       attackStack: this.attackStack,
       lastPlayedCard: this.lastPlayedCard,
+      allPlayers: this.allPlayers,
+      lastNopePlayer: this.lastNopePlayer
     };
   }
 
@@ -81,11 +95,11 @@ class Game {
     for (let i = 0; i < drawCount; i++) {
       const drawnCard = this.deck.draw();
       if (drawnCard instanceof card.ExplodingKittenCard) {
-        console.log(`${this.currentPlayer.name} gets an Exploding Kitten Card`);
+        this.gameLogCallback(`${this.currentPlayer.name} gets an Exploding Kitten Card`);
         const defuseIndex = this.currentPlayer.hasDefuseCard();
         if (defuseIndex >= 0) {
           // Use the Defuse card
-          console.log(`${this.currentPlayer.name} has a defuse card`);
+          this.gameLogCallback(`${this.currentPlayer.name} has a defuse card`);
           this.currentPlayer.hand.splice(defuseIndex, 1);
           this.discardPile.push(new card.DefuseCard());
           this.deck.addcards(new card.ExplodingKittenCard(), 1);
@@ -94,7 +108,7 @@ class Game {
         } else {
           // The player does not have a Defuse card and is eliminated
           this.AddDeadPlayer(this.currentPlayer);
-          console.log(`${this.currentPlayer.name} is dead`);
+          this.gameLogCallback(`${this.currentPlayer.name} is dead`);
           this.players.splice(this.players.indexOf(this.currentPlayer), 1);
           this.numberOfPlayers--;
         }
@@ -127,32 +141,34 @@ class Game {
   async playCard(
     player: Player,
     cardIndex: number,
-    requestPlayNopeCallback: (player: Player) => Promise<boolean>,
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
+    requestPlayNopeCallback: (player: Player) => Promise<string| null>,
+    updateStateCallback: Function,
+    notifyNopeCallback: Function,
   ) {
     if (cardIndex === -1) {
       return null;
     }
     const playcard = player.getCardbyIndex(cardIndex);
-    console.log(`${this.currentPlayer.name} plays ${playcard.getName()}`);
+    this.gameLogCallback(`${this.currentPlayer.name} plays ${playcard.getName()}`);
     this.lastPlayedCard = playcard;
 
-    //If player play Number Card Nope cannot be played.
-    if (playcard instanceof card.NumberCard) {
-      await this.useNumberCard(
-        this.currentPlayer,
-        this.currentPlayer.hasPair(),
-        requestCardFromPlayerCallback,
-      );
+    if (!(playcard instanceof card.NumberCard)){
+      this.discardPile.push(playcard);
+      player.removeCardByIndex(cardIndex);
+    }
+
+    updateStateCallback(); // update state after the card is discarded
+
+    // Check if the next player wants to play a Nope card
+    const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
+    if (nopeCardPlayed) {
+      this.gameLogCallback(`someone plays nope card`);
       return;
     }
-    // Check if the next player wants to play a Nope card
-    const nopeCardPlayed = await this.waitForNope(requestPlayNopeCallback);
 
-    this.discardPile.push(playcard);
-    player.removeCardByIndex(cardIndex);
-
-    if (nopeCardPlayed) {
+    //If player play Number Card
+    if (playcard instanceof card.NumberCard) {
+      this.useNumberCard(this.currentPlayer, this.currentPlayer.hasPair());
       return;
     }
     //Activate card effect
@@ -164,7 +180,6 @@ class Game {
     //See the future Card effect
     else if (playcard instanceof card.SeeTheFutureCard) {
       this.useSeeTheFutureCard();
-      console.log(this.useSeeTheFutureCard());
     }
     //Attack Card effect
     else if (playcard instanceof card.AttackCard) {
@@ -189,36 +204,45 @@ class Game {
    * @returns {Promise<boolean>} A promise that resolves to true if the original action is canceled, or false if it's not.
    */
   async waitForNope(
-    requestPlayNope: (player: Player) => Promise<boolean>,
+    requestPlayNope: (player: Player) => Promise<string | null>,
+    notifyNopeCallback: Function,
     nopeCount = 0,
+    lastNopePlayer = this.lastNopePlayer,
   ): Promise<boolean> {
     let nopePlayed = false;
-    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+    notifyNopeCallback();
 
+    const hasNope: Array<Player> = [];
+    const nopeIndex: Map<string, number> = new Map();
+    const trackPlayers: Map<string, Player> = new Map();
+    
     for (const player of this.players) {
-      // Check if the player has a Nope card and if it's not their first turn to play a Nope card (to prevent double nope by the current player)
-      if (player.hasNopeCard() >= 0 && !(player === this.currentPlayer && nopeCount === 0)) {
-        console.log(`${player.name} got the nope card`);
-        const response = await Promise.race([requestPlayNope(player), timeout]);
-        let nopeCardIndex = player.hasNopeCard();
-        if (response) {
-          nopePlayed = true;
-          nopeCount++;
-          this.playNopeCard(player, nopeCardIndex);
-          break;
-        }
+      const index = player.hasNopeCard();
+      trackPlayers.set(player.name, player);
+      if (player.name !== lastNopePlayer.name) {
+        hasNope.push(player);
+        nopeIndex.set(player.name, index);
       }
     }
+    this.timerCallback(5);
+      const response: any= await Promise.race([requestPlayNope(hasNope[0]), requestPlayNope(hasNope[1]), requestPlayNope(hasNope[2]), new Promise((resolve) => setTimeout(resolve, 5000))]);
+        if (response) {
+          this.gameLogCallback(`${response} plays nope card`);
+          nopePlayed = true;
+          nopeCount++;
+          this.lastNopePlayer = trackPlayers.get(response)!;
+          this.playNopeCard(trackPlayers.get(response)! , nopeIndex.get(response)!);
+        }
 
     if (nopePlayed) {
       // Wait for another Nope card in response to the current Nope card
-      const nopeCanceled = await this.waitForNope(requestPlayNope, nopeCount);
+      const nopeCanceled = await this.waitForNope(requestPlayNope, notifyNopeCallback, nopeCount, this.lastNopePlayer);
       // If nopeCanceled is true, it means an even number of Nopes were played, so the original action is not canceled
-      return !nopeCanceled;
+      return nopeCanceled;
     } else {
       // If nopePlayed is false, it means there were no more Nopes played
       // If nopeCount is odd, the original action is canceled
-      console.log(`no one plays nope card`);
+      if (nopeCount % 2 === 1) { this.gameLogCallback(`card effect is canceled by nope`) };
       return nopeCount % 2 === 1;
     }
   }
@@ -234,16 +258,16 @@ class Game {
   }
 
   /**
-   *R
+   *Random target player (as for now)
    */
-  choosePlayer(targetPlayer: Player) {
+  choosePlayer(player: Player) {
     let randomIndex: number;
     let randomPlayer: Player;
 
     do {
       randomIndex = Math.floor(Math.random() * this.players.length);
       randomPlayer = this.players[randomIndex];
-    } while (randomPlayer.name === targetPlayer.name);
+    } while (randomPlayer.name === player.name);
 
     return randomPlayer;
   }
@@ -259,6 +283,8 @@ class Game {
    * Use See the future card effect.
    */
   useSeeTheFutureCard() {
+    // emit.to(player).("see future", this.deck.peek(3))
+    this.seeFureCallback(this.currentPlayer.name, this.deck.peek(3));
     return this.deck.peek(3);
   }
 
@@ -278,6 +304,7 @@ class Game {
    */
   useAttackCard() {
     this.attackStack++;
+    this.gameLogCallback(`attack stack is ${this.attackStack} draws`);
     this.nextTurn();
   }
 
@@ -285,58 +312,37 @@ class Game {
    * Use Favor card effect.
    */
   useFavorCard(targetPlayer: Player) {
+    if (targetPlayer.getHandLength() == 0) {
+      this.gameLogCallback(`${this.currentPlayer.name} try to steal from ${targetPlayer.name}, but he does not have any card`);
+      return;
+    }
     const chosenCard = targetPlayer.giveRandomCard();
     this.currentPlayer.addCardToHand(chosenCard);
-    console.log(`${this.currentPlayer.name} got ${chosenCard.name} from ${targetPlayer.name}`);
+    this.gameLogCallback(`${this.currentPlayer.name} steal a card from ${targetPlayer.name}`);
+    this.randomCardCallback(this.currentPlayer.name);
   }
 
-  async useNumberCard(
-    player: Player,
-    cardIndices: number[],
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<number>,
-  ) {
+  useNumberCard(player: Player, cardIndices: number[]) {
     // Check if the player has a pair of NumberCards with the same rank
     if (cardIndices.length === 2) {
-      console.log(`${player.name} got 2 cards`);
+      cardIndices.sort((a, b) => a - b);
       const card1 = player.getCardbyIndex(cardIndices[0]);
       const card2 = player.getCardbyIndex(cardIndices[1]);
 
       if (card1 instanceof card.NumberCard && card2 instanceof card.NumberCard) {
         // Discard the pair of cards
         this.discardPile.push(card1, card2);
+        player.removeCardByIndex(cardIndices[1]);
         player.removeCardByIndex(cardIndices[0]);
-        player.removeCardByIndex(cardIndices[1]-1); // TODO: Fix this hardcode
 
         // Choose a target player
         const targetPlayer = this.choosePlayer(player);
 
         // Use the pair effect (steal a card from the target player)
-        console.log(`player ${player.name} use pair effect to ${targetPlayer.name}`);
-        await this.requestCardFromPlayer(requestCardFromPlayerCallback, player, targetPlayer);
+        this.gameLogCallback(`player ${player.name} use pair effect to ${targetPlayer.name}`);
+        this.useFavorCard(targetPlayer);
+        this.randomCardCallback(player.name);
       }
-    }
-    else{
-    console.log(`player doesn't have the same 2 cards`);
-    }
-  }
-
-  async requestCardFromPlayer(
-    requestCardFromPlayerCallback: (targetPlayer: Player) => Promise<any>,
-    player: Player,
-    targetPlayer: Player,
-  ) {
-    const cardIndex = await requestCardFromPlayerCallback(player);
-
-    // const cardIndex =
-
-    if (cardIndex != null) {
-      // Take the chosen card from the target player's hand
-      const stolenCard = targetPlayer.hand.splice(cardIndex, 1)[0];
-      console.log(`player ${player.name} stole ${stolenCard.name}`);
-      player.addCardToHand(stolenCard);
-    } else {
-      // If the target player doesn't have any cards, nothing happens
-      console.log('player doesnt have any card');
     }
   }
 
@@ -348,10 +354,11 @@ class Game {
     const nextPlayerIndex = (currentIndex + 1) % this.players.length;
     this.currentPlayer = this.players[nextPlayerIndex];
     this.turn++;
+    this.lastNopePlayer = this.currentPlayer;
   }
 
   nextPlayer() {
-    return this.players[this.currentPlayerIndex + 1];
+    return this.players[(this.currentPlayerIndex + 1) % this.players.length];
   }
 }
 
