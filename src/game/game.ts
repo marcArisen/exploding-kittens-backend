@@ -208,6 +208,7 @@ class Game {
     notifyNopeCallback: Function,
     nopeCount = 0,
     lastNopePlayer = this.lastNopePlayer,
+    delay = 5000
   ): Promise<boolean> {
     let nopePlayed = false;
     notifyNopeCallback();
@@ -225,7 +226,11 @@ class Game {
       }
     }
     this.timerCallback(5);
-      const response: any= await Promise.race([requestPlayNope(hasNope[0]), requestPlayNope(hasNope[1]), requestPlayNope(hasNope[2]), new Promise((resolve) => setTimeout(resolve, 5000))]);
+    const response: any = await Promise.race([
+      ...hasNope.map(player => requestPlayNope(player)),
+      new Promise((resolve) => setTimeout(resolve, delay)),
+    ]);
+    
         if (response) {
           this.gameLogCallback(`${response} plays nope card`);
           nopePlayed = true;

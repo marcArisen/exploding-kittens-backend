@@ -182,6 +182,35 @@ describe('Game', () => {
   //   const nopeResult = await game.waitForNope(requestPlayNopeCallback, notifyNopeCallback);
   //   expect(nopeResult).toBe(true);
   // });
+  it('forces a specific player to play a Nope card', async () => {
+    // Add a Nope card to targetPlayer's hand
+    game.currentPlayer = game.players[0];
+    const targetPlayer = game.players[1];
+    targetPlayer.addCardToHand(card.NopeCard);
+  
+    // Force targetPlayer to play a Nope card
+    const forcedPlayerName = targetPlayer.name;
+    const testDelay = 100;
+    const requestPlayNopeMock = async (player: Player) => {
+    return new Promise<string | null>((resolve) => {
+      setTimeout(() => {
+        if (player.name === forcedPlayerName) {
+          resolve(forcedPlayerName);
+        } else {
+          resolve(null);
+        }
+      }, testDelay/10);
+    });
+  };
+
+  const notifyNopeCallback = () => {};
+  const nopePlayed = await game.waitForNope(requestPlayNopeMock, notifyNopeCallback, 0, game.lastNopePlayer, testDelay);
+
+  expect(nopePlayed).toBe(true);
+});
+  
+  
+  
 
   it('should return the current game state', () => {
     // Set up the game state
@@ -346,76 +375,84 @@ describe('Game', () => {
     expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Favor');
     expect(game.currentPlayer.getHandLength()).toEqual(0);
   });
-  // it('Action card effect should not work when Nope card is played', async () => {
-  //   game.currentPlayer.addCardToHand(new card.AttackCard());
-  //   let nopePlayer = game.nextPlayer();
-  //   nopePlayer.addCardToHand(new card.NopeCard());
-  //   console.log('Game state:', game.getCurrentState());
-  //   // Mock the requestPlayNopeCallback to return true only for the nopePlayer
-  //   const mockRequestPlayNopeCallback = async (player: Player) => {
-  //     if (player.name !== game.currentPlayer.name) {
-  //       return player.name;
-  //     } else {
-  //       return null;
-  //     }
-  //   };    
+  it('Action card effect should not work when Nope card is played', async () => {
+    game.currentPlayer.addCardToHand(new card.AttackCard());
+    let nopePlayer = game.nextPlayer();
+    nopePlayer.addCardToHand(new card.NopeCard());
+    console.log('Game state:', game.getCurrentState());
+    // Mock the requestPlayNopeCallback to return true only for the nopePlayer
+    const mockRequestPlayNopeCallback = async (player: Player) => {
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 1); // Set the delay to half of the testDelay
+      });
+    };
 
-  //   // Play the AttackCard
-  //   const requestPlayNopeCallback = async (player: Player) => null;
-  //   const updateStateCallback = () => {};
-  //   const notifyNopeCallback = () => {};
+    // Play the AttackCard
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-  //   await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
-  //     updateStateCallback,
-  //     notifyNopeCallback
-  //   );
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
+    );
 
-  //   // Check if the last card in the discardPile is the Nope card
-  //   console.log('Game state:', game.getCurrentState());
-  //   console.log('Discard pile:', game.discardPile);
-  //   expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
-  //   expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
+    // Check if the last card in the discardPile is the Nope card
+    console.log('Game state:', game.getCurrentState());
+    console.log('Discard pile:', game.discardPile);
+    expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
+    expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
 
-  //   // Check if the action card effect is not applied (attackStack remains 0)
-  //   expect(game.attackStack).toBe(0);
-  // });
+    // Check if the action card effect is not applied (attackStack remains 0)
+    expect(game.attackStack).toBe(0);
+  });
 
-  // it('Action card effect should work when Doubled Nope card is played', async () => {
-  //   game.currentPlayer.addCardToHand(new card.AttackCard());
-  //   let nopePlayer = game.nextPlayer();
-  //   nopePlayer.addCardToHand(new card.NopeCard());
-  //   console.log('Game state:', game.getCurrentState());
-  //   // Mock the requestPlayNopeCallback to return true only for the nopePlayer
-  //   // const mockRequestPlayNopeCallback = async (player: Player) => {
-  //   //   return player !== game.currentPlayer;
-  //   // };
+  it('Action card effect should work when Doubled Nope card is played', async () => {
+    game.currentPlayer.addCardToHand(new card.AttackCard());
+    let nopePlayer = game.nextPlayer();
+    nopePlayer.addCardToHand(new card.NopeCard());
+    console.log('Game state:', game.getCurrentState());
+    // Mock the requestPlayNopeCallback to return true only for the nopePlayer
+    // const mockRequestPlayNopeCallback = async (player: Player) => {
+    //   return player !== game.currentPlayer;
+    // };
 
-  //   // Play the AttackCard
-  //   const mockRequestPlayNopeCallback = async (player: Player) => {
-  //     if (player.name !== game.currentPlayer.name) {
-  //       return player.name;
-  //     } else {
-  //       return null;
-  //     }
-  //   };    
+    // Play the AttackCard
+    const mockRequestPlayNopeCallback = async (player: Player) => {
+      return new Promise<string | null>((resolve) => {
+        setTimeout(() => {
+          if (player.name === nopePlayer.name) {
+            resolve(nopePlayer.name);
+          } else {
+            resolve(null);
+          }
+        }, 10); // Set the delay to half of the testDelay
+      });
+    };
 
-  //   // Play the AttackCard
-  //   const requestPlayNopeCallback = async (player: Player) => null;
-  //   const updateStateCallback = () => {};
-  //   const notifyNopeCallback = () => {};
+    // Play the AttackCard
+    const requestPlayNopeCallback = async (player: Player) => null;
+    const updateStateCallback = () => {};
+    const notifyNopeCallback = () => {};
 
-  //   await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
-  //     updateStateCallback,
-  //     notifyNopeCallback
-  //   );
+    await game.playCard(game.currentPlayer, game.currentPlayer.hand.length - 1, mockRequestPlayNopeCallback,
+      updateStateCallback,
+      notifyNopeCallback
+    );
 
-  //   // Check if the last card in the discardPile is the Nope card
-  //   console.log('Game state:', game.getCurrentState());
-  //   console.log('Discard pile:', game.discardPile);
-  //   expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
-  //   expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
+    // Check if the last card in the discardPile is the Nope card
+    console.log('Game state:', game.getCurrentState());
+    console.log('Discard pile:', game.discardPile);
+    expect(game.discardPile[game.discardPile.length - 1]).toBeInstanceOf(card.NopeCard);
+    expect(game.discardPile[game.discardPile.length - 1].getName()).toEqual('Nope');
 
-  //   // Check if the action card effect is not applied (attackStack remains 0)
-  //   expect(game.attackStack).toBe(0);
-  // });
+    // Check if the action card effect is not applied (attackStack remains 0)
+    expect(game.attackStack).toBe(0);
+  });
 });
